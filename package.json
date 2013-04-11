@@ -1,0 +1,46 @@
+{
+  "name": "palmares",
+  "version": "1.0.0",
+  "author": "Feugy <damien.feugas@gmail.com>",
+  "description": "Palmares [pal.ma.ʁɛs] is a desktop application to get french and internationnal ballroom dancing results",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/feugy/palmares.git"
+  },
+  "dependencies": {
+    "async": "0.2.6",
+    "cheerio": "0.10.8",
+    "coffee-script": "1.6.2",
+    "csv": "0.2.9",
+    "fs-extra": "0.5.0",
+    "hogan.js": "2.0.0",
+    "js-yaml": "2.0.3",
+    "md5": "1.0.0",
+    "moment": "2.0.0",
+    "request": "2.16.6",
+    "stylus": "0.32.1",
+    "underscore": "1.4.4",
+    "underscore.string": "2.3.1",
+    "xlsxjs": "https://github.com/feugy/xlsx.js/archive/master.tar.gz"
+  },
+  "devDependencies": {
+    "chai": "1.5.0",
+    "express": "3.1.0",
+    "iconv-lite": "0.2.7",
+    "mocha": "1.8.2"
+  },
+  "scripts": {
+    "test": "cake test"
+  },
+  "main": "index.html",
+  "licence": "MIT",
+  "engine": {
+    "node": "0.10.2"
+  },
+  "window": {
+    "toolbar": false,
+    "show": false,
+    "min_width": 500,
+    "min_height": 900
+  }
+}

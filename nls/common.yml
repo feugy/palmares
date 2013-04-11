@@ -1,0 +1,81 @@
+titles:
+  application: Palmarès
+  welcome: Bienvenue dans Palmarès !
+  tracked: Couples suivis
+  trackCouples: Ajouter des couples
+  trackError: Erreur lors du suivi
+  couple: Palmarès de l'année
+  confirm: Confirmation
+  exportError: "Erreur d'exportation"
+
+buttons:
+  yes: Oui
+  no: Non
+  cancel: Annuler
+  track: Ajouter des couples
+  untrack: Enlever
+  add: Ajouter
+  home: Retour
+  export: Exporter
+  refresh: Mettre à jour
+  competitions: Compétitions
+
+msgs:
+  loading: chargement en cours...
+  noCompetition: Aucun résultat de compétition disponible.
+  tracked: >
+    Ajoutez des couples a suivre: leur palmarès de l'année sera établi et automatiquement mis à jour.
+  noTracked: 'Actuellement, aucun couple suivi.'
+  noPalmares: Ce couple n'a participé à aucune compétition connue
+  noCompetitions: >
+    <p>Aucune compétition analysée pour l'instant.<p>
+    <p>Sur la page d'accueil, utilisez le bouton de mise à jour, ou ajouter des couples à suivre.</p>
+  chooseCouple: >
+    <p>Choisissez le nom d'un couple : prénom et nom du cavalier, '-', prénom et nom de la cavalière.</p>
+    <p>Par exemple:</p>
+    <blockquote>Pierre Durand - Melanie Dupont-aubois</blockquote>
+  chooseGroup: >
+    <p>Vous pouvez aussi suivre tous les couples actifs d'un club (ville, '/', sigle) :</p>
+    <blockquote>Paris/PDSC</blockquote>
+  untrack: >
+    <p>Souhaitez vous vraiment ne plus suivre <span class="text-warning"><strong>%1$s</strong></span> ?<p>
+    <p>Vous pourrez toujours les rajouter à nouveau plus tard.</p>
+  removeCompetition: >
+    <p>Souhaitez vous vraiment supprimer la compétition <span class="text-warning"><strong>%1$s</strong></span> ?<p>
+    <p>Elle sera de nouveau analysée lors de la prochaine mise à jour.</p>
+  trackingStart: <div>Récupération des compétitions</div>
+  trackingEnd: <div>Etablissement des palmarès</div>
+  competitionRetrieved: > 
+    <div>%1$s: <em>%2$s</em> compétitions en cours d'analyse...</div>
+  competitionInProgress: >
+    <div class="%1$s">Analyse de <em>%2$s %3$s</em>: concours <span class="done">0</span>/<span class="total"></span>...</div>
+  competitionAnalyzed: >
+    <div>Compétition de <em>%1$s %2$s</em> analysée</div>
+  newResult: Nouveau résultat de %1$s à %2$s !
+  validCouple: le nom semble bon !
+  foundInGroup: '%1$s couple(s) trouvé(s) !'
+  searchInProgress: 'consultation en cours...'
+
+errors:
+  track: >
+    <p>Nous sommes désolé : nous ne pouvons établir le palmarès de ce(s) couple(s).</p>
+    <p>L'erreur suivante est survenue :</p>
+    <blockquote>%1s</blockquote>
+    <p>Vous pouvez :
+      <ol><li>Vérifier que votre connexion internet est correcte</li>
+      <li>Vérifier l'orthographe des noms et prénoms des couples ajoutés</li></ol>
+    </p>
+  export: >
+    <p>Nous sommes désolé : l'export Excell ne peut être réalisé.</p>
+    <p>L'erreur suivante est survenue :</p>
+    <blockquote>%1s</blockquote>
+
+export:
+  globalSheet: Par compétition
+  dateFormat: DD/MM/YYYY
+  couple: Couple
+  result: Résultat
+  contest: Catégorie
+  lat: Latines
+  std: Standards
+dateFormat: DD/MM/YY

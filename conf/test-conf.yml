@@ -1,0 +1,13 @@
+providers:
+
+  FFDS:
+    name: Fédération Française de Danse Sportive
+    url: http://www.ffddansesportive.com
+    list: compet-resultats.php
+    dateFormat: DD/MM/YYYY
+
+  WDSF:
+    name: World Danse Sport Federation
+    url: http://www.worlddancesport.org
+    list: 'Calendar/Competition/Results#format=List&month=%2s&year=%1s&kindFilter=Competition'
+    dateFormat: DD/MM/YYYY

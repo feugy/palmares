@@ -1,0 +1,56 @@
+// cross-browser compatibility
+transition(args...)
+  -wekbit-transition args
+  transition args
+
+transform(args...)
+  -webkit-transform args
+  transform args
+
+
+transform-origin(args...)
+  -webkit-transform-origin args
+  transform-origin args
+  
+perspective(args...)
+  -webkit-perspective args
+  perspective args
+
+box-sizing(args...)
+  -webkit-box-sizing args
+  box-sizing args
+
+// Flexible box model compatibility
+display(value)
+  if value == box
+    display -webkit-box
+    display box
+  else if value == inline-box
+    display -webkit-inline-box
+    display inline-box
+  else
+    display value
+
+box-flex(args...)
+  -webkit-box-flex args
+  box-flex args
+
+box-ordinal-group(args...)
+  -webkit-box-ordinal-group args
+  box-ordinal-group args
+
+box-pack(args...)
+  -webkit-box-pack args
+  box-pack args
+
+box-direction(args...)
+  -webkit-box-direction args
+  box-direction args
+
+box-align(args...)
+  -webkit-box-align args
+  box-align args
+
+box-orient(args...)
+  -webkit-box-orient args
+  box-orient args

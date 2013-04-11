@@ -1,0 +1,10 @@
+<a class="home btn" href="#">{{i18n.buttons.home}}</a>
+<h1>{{i18n.titles.competitions}}</h1>
+{{#competitions}}
+<div class="competition" data-id="{{id}}">
+  <span class="name">{{place}}</span><span class="date">{{date}}</span><a class="remove btn" href="#"><i class='icon-remove'></i></a>
+</div>
+{{/competitions}}
+{{^competitions}}
+{{i18n.msgs.noCompetitions}}
+{{/competitions}}

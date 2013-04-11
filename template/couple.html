@@ -1,0 +1,17 @@
+<a class="home btn" href="#">{{i18n.buttons.home}}</a>
+<h1>{{name}}</h1>
+<h2>{{i18n.titles.couple}}</h2>
+{{#palmares}}
+<div class="competition">
+  <h3><span class="place">{{competition.place}}</span><span class="date">{{competition.date}}</span></h3>
+  <dl>
+    {{#results}}
+    <dt>{{contest}}</dt>
+    <dd><span class="rank">{{rank}}</span><span class="total">{{total}}</span></dd>
+    {{/results}}
+  </dl>
+</div>
+{{/palmares}}
+{{^palmares}}
+<p>{{i18n.msgs.noPalmares}}</p>
+{{/palmares}}

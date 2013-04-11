@@ -1,0 +1,40 @@
+@import 'constants'
+@import 'bootstrap-2.3.1-min.css'
+@import 'mixins'
+
+/***********************************************
+ * Layout
+ */
+
+html 
+  height 100%
+
+body
+  height 100%
+  width 100%
+  background-color pageColor
+  position relative
+
+#main
+  box-orient horizontal
+  box-align top
+  box-pack center
+  box-sizing border-box
+  padding 50px
+  display box
+  height 100%
+  width 100%
+
+.progress-panel .alert-info
+  max-height 5em
+  overflow auto
+  box-sizing content-box
+
+.modal-body
+  overflow-y visible
+
+.track .alert
+  background-color transparent
+  border none
+  margin-bottom 0
+  font-style italic
