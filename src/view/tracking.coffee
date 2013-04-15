@@ -47,6 +47,8 @@ module.exports = class HomeView extends View
       couple: false
       group: false
     @status = {}
+    @_onCheckGroup = _.debounce @_onCheckGroup, 500
+    @_onCheckCouple = _.debounce @_onCheckCouple, 500
     @render()
 
   # Extends superclass to attach widget to rendering.

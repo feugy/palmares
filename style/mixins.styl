@@ -76,3 +76,20 @@ fold-corner(selector, cornerSize, bgColor, isRight = false)
     border-left-color bgColor unless isRight
     border-top-color bgColor 
     bottom 0
+
+// button overloading
+button(selector, bgColor, iconWhite = false)
+
+  {selector}
+    background-image -webkit-linear-gradient(top, lighten(bgColor, 75%), bgColor)
+    background-color bgColor
+    border-color bgColor bgColor lighten(bgColor, 50%)
+    if iconWhite
+      i
+        background-image url(glyphicons-halflings-white.png)
+
+  {selector}:focus, {selector}:hover, {selector}:active, {selector}:active, {selector}.disabled, {selector}[disabled]
+    background-color bgColor
+
+  {selector}.active, {selector}:active, {selector}.disabled, {selector}[disabled]
+    background-image none

@@ -47,7 +47,7 @@ module.exports = class ProgressView extends View
   render: =>
     super()
     @progress = @$ '.progress .bar'
-    @details = @$ '.alert'
+    @details = @$ '.details'
     @
 
   # Tracking progress handler

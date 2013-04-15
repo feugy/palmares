@@ -52,8 +52,8 @@ module.exports = class Router extends EventEmitter
     $('.parameters').addClass('btn-group').html("""
       <a class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-cog"></i><span class="caret"></span></a>
       <ul class="dropdown-menu">
-        <li><a class="settings">#{@i18n.buttons.settings}</a></li>
-        <li><a class="about"  >#{@i18n.buttons.about}</a></li>
+        <li class="settings">#{@i18n.buttons.settings}</li>
+        <li class="about"  >#{@i18n.buttons.about}</li>
       </ul>""")
       .on('click', '.settings', @_onSettings)
       .on 'click', '.about', @_onAbout
@@ -86,7 +86,7 @@ module.exports = class Router extends EventEmitter
         <div class="control-group">
           <label class="control-label">#{@i18n.labels.proxy}</label>
           <div class="controls">
-            <input class="proxy" value="#{util.confKey 'proxy', ''}">
+            <input class="proxy" type="text" value="#{util.confKey 'proxy', ''}">
           </div>
         </div>
       </form>

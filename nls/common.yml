@@ -93,7 +93,7 @@ export:
 about:
   version: 'Version 1.0.0,  15/04/2013'
   description: >
-    <img src="img/ribas.png">
+    <img src="style/ribas.png">
     <p>Développé pour le Club Villeurbannais de Danse Sportive, cette application permet en un seul coup d'oeil de consulter les résultat nationnaux et internationnaux de danse sportive, et de suivre vos couples préférés en établissant leur palmares.</p>
     <p>Les informations sont récupérés sur les pages web publiques des fournisseurs suivants :</p>
   contact: >

@@ -25,6 +25,7 @@ module.exports = class HomeView extends View
     'click .refresh': '_onRefreshPopup'
     'click .competition': '_onOpenCompetition'
     'click .remove': '_onRemove'
+    'click .export': '_onExport'
 
   # Home View constructor
   # Immediately renders the view

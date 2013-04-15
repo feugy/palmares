@@ -8,6 +8,7 @@
 
 html, body
   height 100%
+  cursor default
   -webkit-user-select none
 
 input
@@ -15,6 +16,12 @@ textarea
   font-size fontSize
   font-family fontFamily
   -webkit-user-select text
+  cursor text
+
+a
+button
+select
+  cursor pointer
 
 body
   display box
@@ -46,7 +53,7 @@ body
       font-weight lighter
 
     .top
-      background url('../img/line-top.png') no-repeat
+      background url(../style/line-top.png) no-repeat
       background-position center right
       top 15px
       height 10px
@@ -121,7 +128,7 @@ body
         display inline-block
         width 374px
         opacity 0.2
-        background-image url(../img/test.png)
+        background-image url(../style/test.png)
         background-size cover
 
     fold-corner '.box:not(.right)', 16px, boxBackground
@@ -156,6 +163,71 @@ body
   [class*=" icon-"]
     margin-right 7px
     margin-top 7px
+
+button('.btn', buttonColor)
+button('.btn-primary', inverseColor, true)
+button('.btn-warning', warningColor)
+
+.modal-header
+  color boxColor
+  text-shadow boxShadow
+  background-color primaryColor
+  border-radius 4px 4px 0 0
+
+  .close
+    opacity 1
+    color boxColor
+    text-shadow boxShadow
+
+.modal-footer
+  border-top none
+  background-color transparent
+  padding-top 0
+
+.btn:focus
+a:focus
+select:focus 
+input[type="file"]:focus 
+input[type="radio"]:focus 
+input[type="checkbox"]:focus
+  outline 5px auto primaryColor
+  outline-offset 2px
+
+input:not([type=button]):not([type=submit]):focus 
+.uneditable-input:focus
+  border-color rgba(primaryColor, 0.8)
+  box-shadow inset 0 1px 1px rgba(0,0,0,0.075), 0 0 3px rgba(primaryColor,0.6)
+
+.dropdown-menu 
+  padding 0
+  margin-top 3px
+  border-radius 0
+
+  > li
+  > li.active
+    padding 5px 20px
+    line-height 20px
+    white-space nowrap
+    background-color transparent
+
+    > a
+    > a:hover
+    > a:focus
+      padding 0 
+      background transparent
+
+  > li:hover
+  > li.active
+    color boxColor
+    text-shadow boxShadow
+    background boxBackground
+    cursor pointer
+
+.progress
+  background-image -webkit-linear-gradient(top, lighten(warningColor, 70%), lighten(warningColor, 50%))
+
+.progress-striped .bar
+  background-color warningColor
 
 /***********************************************
  * Home view
@@ -299,6 +371,22 @@ body
       .rank:after
         content '.'
 
+    li.tracked 
+      color primaryColor
+
+      .rank
+        color primaryColor
+
+      .name:after
+        content ''
+        background-image url(glyphicons-halflings.png)
+        background-position -120px -72px
+        display inline-block
+        margin 0 0 -2px 5px
+        height size=14px
+        line-height size
+        width size
+
     li.tracked
       cursor pointer
 
@@ -306,10 +394,14 @@ body
  * Progress view
  */
 
-.progress-view .alert-info
+.progress-view .details
   max-height 8em
   overflow auto
   box-sizing content-box
+
+  em
+    font-style normal
+    color primaryColor
 
 /***********************************************
  * Tracking view

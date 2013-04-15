@@ -1,5 +1,5 @@
 # TODO
 
-- mise en forme des boutons et popup
-- last results
+- dernièrs résultats
+- photos
 - bug récupération de nouvelles compétition des deux providers
