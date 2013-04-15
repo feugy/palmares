@@ -26,9 +26,6 @@ process.on 'uncaughtException', (err) ->
 # DOM is ready
 win.on 'loaded', ->
 
-  # TODO dev
-  win.showDevTools()
-
   # opens dev tools on F12 or Command+Option+J
   $(window).on 'keyup', (event) ->
     win.showDevTools() if event.which is 123 or event.witch is 74 and event.metaKey and event.altKey

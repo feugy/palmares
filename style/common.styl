@@ -1,40 +1,377 @@
-@import 'constants'
 @import 'bootstrap-2.3.1-min.css'
 @import 'mixins'
+@import 'constants'
 
 /***********************************************
  * Layout
  */
 
-html 
+html, body
   height 100%
+  -webkit-user-select none
+
+input
+textarea
+  font-size fontSize
+  font-family fontFamily
+  -webkit-user-select text
 
 body
-  height 100%
-  width 100%
-  background-color pageColor
-  position relative
-
-#main
-  box-orient horizontal
-  box-align top
-  box-pack center
-  box-sizing border-box
-  padding 50px
   display box
-  height 100%
-  width 100%
+  box-orient vertical
+  color fontColor
+  font-size fontSize
+  font-family fontFamily
+  background pageBackground
+  position relative
+  box-sizing border-box
+  padding 0
+  margin 0
 
-.progress-panel .alert-info
-  max-height 5em
-  overflow auto
-  box-sizing content-box
+  header
+    
+    hr
+      border none
+      margin 0
+      position absolute
+      width 95%
+      
+    h1
+      margin 0
+      padding-top 30px
+      color titleColor
+      text-align center
+      text-shadow titleShadow
+      font-size 47px
+      font-weight lighter
+
+    .top
+      background url('../img/line-top.png') no-repeat
+      background-position center right
+      top 15px
+      height 10px
+      right 0
+      margin-right 7%
+      opacity 0.5
+
+    .bottom
+      background rgba(primaryColor, 0.6)
+      top 75px
+      height 6px
+      left 0
+      margin-left 5%
+
+    .bottom2
+      background rgba(inverseColor, 0.6)
+      top 83px
+      height 15px
+      right 0
+      margin-right 7%
+
+    .parameters
+      position absolute
+      top 34px
+      right 2%
+
+      .dropdown-toggle > i
+        margin-right 5px
+
+      .dropdown-menu
+        left auto
+        right 0
+
+  > .container
+    box-flex 1
+    width 900px
+    box-sizing border-box
+    padding 20px 0px 20px 20px
+    margin-top 110px
+    display box
+    box-orient vertical
+
+    #main
+      box-flex 1
+      overflow auto
+
+    .box
+      position absolute
+      left 0
+      top 100px
+      text-align right
+      box-sizing border-box
+      width 45%
+      padding 18px 20px 22px 0
+      background boxBackground
+      color boxColor
+      font-size 35px
+      font-weight lighter
+      text-shadow boxShadow
+      z-index 1
+
+      .text
+        position relative
+        z-index 1
+
+      .image
+        position absolute
+        left 0
+        top 0
+        bottom 0
+        z-index 0
+        display inline-block
+        width 374px
+        opacity 0.2
+        background-image url(../img/test.png)
+        background-size cover
+
+    fold-corner '.box:not(.right)', 16px, boxBackground
+
+    .right.box
+      left auto
+      right 0
+      text-align left
+      padding 18px 0 22px 20px
+
+      .image
+        left auto
+        right 0
+    
+    fold-corner '.right.box', 16px, boxBackground, true
+
+/***********************************************
+ * Bootstrap widgets
+ */
 
 .modal-body
   overflow-y visible
 
-.track .alert
-  background-color transparent
-  border none
-  margin-bottom 0
-  font-style italic
+[class^="icon-"]
+[class*=" icon-"]
+  margin-top 3px
+
+.btn-large
+  padding-top 7px
+
+  [class^="icon-"]
+  [class*=" icon-"]
+    margin-right 7px
+    margin-top 7px
+
+/***********************************************
+ * Home view
+ */
+
+.home
+  
+  .bar
+    text-align center
+    margin-bottom 5px
+
+    .hidden
+      opacity 0
+
+    .untrack
+    .remove
+      float right
+      margin 6px 0 0 -40px
+      transition all 0.5s
+
+      i
+        vertical-align -2px
+
+  .list li
+    list-style none
+    padding 0.5em
+    border-radius 2px
+    transition all 0.5s
+    cursor pointer
+
+    input
+      transition all 0.5s
+      margin-right 6px
+    input:not(:checked)
+      opacity 0
+
+  .list li:hover 
+    box-shadow boxShadow
+    background boxBackground
+    color boxColor
+
+    input
+      opacity 1
+
+  .competitions .date
+    font-style italic
+  .competitions .date:after
+    content ' - '
+
+/***********************************************
+ * Competition and Couple view
+ */
+
+.details.couple
+
+  .home
+    right 7%
+
+  .box
+    font-size unit(fontSize*1.8, 'px')
+    line-height 1em
+
+  article:first-child
+    margin-top 40px
+    
+  article .date
+    font-size 0.7em
+  article .date:after
+    content ' - '
+
+  h3 
+    cursor pointer
+
+  ul
+    margin 0 5%
+  li
+    display box
+    box-pack stretch
+    padding 2px 0
+
+  hr
+    box-flex 1
+    margin 0 5px 5px
+    border 0px dashed fontColor
+    border-bottom-width 1px
+
+  .result
+    .rank
+      margin 0
+      color primaryColor
+    .rank:after
+      content '/'
+      color fontColor
+
+.details
+
+  .box .date
+    position absolute
+    background contrastBackground
+    padding 5px 10px
+    line-height 1em
+    bottom -10px
+    left 50px
+    z-index 2
+    font-size unit(fontSize*1.5, 'px')
+
+  .home
+    position absolute
+    top 125px
+
+  article
+    margin 20px 20px 0 0
+    position relative
+    border 1px solid #ddd
+    border-radius 2px
+    padding 25px 10px 10px
+
+    fold-corner 'h3', 8px, contrastBackground
+
+    h3
+      position absolute
+      top -15px
+      left 10%
+      display inline-block
+      padding 5px 10px
+      margin 0
+      line-height 1em
+      background contrastBackground
+      color boxColor
+      font-size unit(fontSize*1.5, 'px')
+      text-shadow boxShadow
+      font-weight lighter
+
+    li
+      list-style none
+
+      .rank
+        margin-right 2em
+        color darken(fontColor, 50%)
+
+      .rank:after
+        content '.'
+
+    li.tracked
+      cursor pointer
+
+/***********************************************
+ * Progress view
+ */
+
+.progress-view .alert-info
+  max-height 8em
+  overflow auto
+  box-sizing content-box
+
+/***********************************************
+ * Tracking view
+ */
+
+.track
+  
+  .alert
+    background-color transparent
+    border none
+    margin-bottom 0
+    font-style italic
+
+  input
+    width 300px
+
+/***********************************************
+ * About view
+ */
+
+
+.about
+  
+  header
+    margin-bottom 40px
+
+    h1
+      padding-top 15px
+
+  .version
+    color primaryColor
+    position absolute
+    right 10px
+    top 55px
+
+  .description
+    margin 1em 0
+
+    img
+      float right
+      width 100px
+
+  .providers
+    list-style none
+
+    em
+      float right
+    li
+      margin-bottom 5px
+      margin-right 1em
+
+  .copyright
+  .credits
+    display block
+    font-style italic
+    color darken(fontColor, 50%)
+
+  .credits
+    font-size 0.9em
+
+  .contact
+    margin-top 35px
+    text-align center
+    color primaryColor
+    font-size 0.9em

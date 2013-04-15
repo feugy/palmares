@@ -1,16 +1,13 @@
 'use strict'
 
 _ = require 'underscore'
-moment = require 'moment'
 fs = require 'fs-extra'
 {normalize} = require 'path'
 xlsx = require 'xlsx.js'
 View = require '../view/view'
 util = require '../util/ui'
 TrackingView = require './tracking'
-
-animDuration = 300
-rankingDelay = 5000
+ProgressView = require './progress'
 
 module.exports = class HomeView extends View
 
@@ -22,54 +19,69 @@ module.exports = class HomeView extends View
 
   # event map
   events: 
-    'click .track.btn': '_onTrackPopup'
-    'click .couple': '_onDisplayCouple'
-    'click .untrack': '_onUntrackCouple'
-    'click .export': '_onExport'
-    'click .refresh': '_onRefresh'
-    'click .competitions': '_onCompetitions'
-
-  # while tracking, the number of competitions to analyze
-  totalComps: null
-
-  # while tracking, the number of analyzed competitions
-  currentComp: null
-
-  # rendering's progress bar
-  progress: null
-
-  # rendering's details popup
-  details: null
-
-  # timeout before automatically close the new results alert
-  resultTimeout: null
+    'click .track': '_onTrackPopup'
+    'click .couple': '_onOpenCouple'
+    'click .untrack': '_onUntrack'
+    'click .refresh': '_onRefreshPopup'
+    'click .competition': '_onOpenCompetition'
+    'click .remove': '_onRemove'
 
   # Home View constructor
   # Immediately renders the view
+  #
+  # @return the built view
   constructor: () ->
-    super className: 'home container'
-    @bindTo service, 'progress', @_onProgress
-    @bindTo service, 'result', @_onResult
+    super className: 'home'
+    #@bindTo service, 'result', @_onResult
     @render()
 
   # Extends superclass behaviour to cache often used nodes
   render: =>
     super()
-    @progress = @$ '.progress .bar'
-    @details = @$ '.progress-panel > .alert'
-    @renderList()
+    @renderTracked()
+    @renderCompetitions()
     @
 
   # refresh only the list of tracked couples
-  renderList: =>
+  renderTracked: =>
     tracked = service.tracked
+    # hide removal button
+    @$('.untrack').toggleClass 'hidden', true
+    list = @$('.tracked .list')
+    # hide optionnal empty message, and displays it if necessary
     @$('.no-tracked').remove()
-    return $("<p class='no-tracked'>#{@i18n.msgs.noTracked}</p>").insertAfter @$('.list').empty() unless tracked.length
-    html = (
+    unless tracked.length
+      return $("<p class='no-tracked'>#{@i18n.msgs.noTracked}</p>").insertAfter list.empty() 
+    list.empty().append (
       for couple in tracked
-        "<li data-name='#{couple.name}'><a class='couple' href='#'>#{couple.name}</a><a class='untrack btn' href='#'><i class='icon-remove'></i></a></li>"
-    )
-    @$('.list').empty().append html.join ''
+        """
+        <li class="couple" data-name="#{couple.name}">
+          <span class="name">#{couple.name}</span>
+          <input type="checkbox" class="pull-right">
+        </li>
+        """
+    ).join ''
+
+  # refresh only the list of competitions
+  renderCompetitions: =>
+    competitions = _.chain(service.competitions).values().sortBy('date').value().reverse()
+    # hide removal button
+    @$('.remove').toggleClass 'hidden', true
+    list = @$('.competitions .list')
+    # hide optionnal empty message, and displays it if necessary
+    @$('.no-competitions').remove()
+    unless competitions.length
+      return $("<p class='no-competitions'>#{@i18n.msgs.noCompetitions}</p>").insertAfter list.empty()
+    list.empty().append (
+      for competition in competitions
+        """
+        <li class="competition" data-id="#{competition.id}">
+          <span class="date">#{competition.date.format @i18n.dateFormat}</span>
+          <span class="name">#{competition.place}</span> 
+          <input type="checkbox" class="pull-right">
+        </li>
+        """
+    ).join ''
 
   # **private**
   # Exports global palmares to xlsx format
@@ -94,7 +106,7 @@ module.exports = class HomeView extends View
   # @param event [Event] cancelled click event
   _onTrackPopup: (event) =>
     event?.preventDefault()
-
+    
     tracking = new TrackingView()
 
     # opens a popup that will track selected couples
@@ -103,13 +115,24 @@ module.exports = class HomeView extends View
     ,
       text: @i18n.buttons.add
       className: 'btn-primary'
-      click: =>
+      click: (event) =>
         # only add selected couples if necessary
         if tracking.couples?.length > 0
+          # display progress inside the same popup
+          event.preventDefault()
+          popup.find('.modal-body').empty().append(@i18n.msgs.updateInProgress).append new ProgressView().$el
+          popup.find('.modal-footer .btn').remove()
+          # add the tracked couples
           service.track tracking.couples,  (err, summary) =>
+            if err?
+              popup.modal 'hide'
+              return util.popup @i18n.titles.trackError, _.sprintf @i18n.errors.track, err.message 
             # render list with newly added couples
-            util.popup @i18n.titles.trackError, _.sprintf @i18n.errors.track, err.message if err?
-            @renderList()
+            @renderTracked()
+            # close popup with a slight delay to show progress
+            _.delay ->
+              popup.modal 'hide'
+            , 1000
     ]
     # insert a tracking view inside
     popup.find('.modal-body').append tracking.$el
@@ -118,67 +141,91 @@ module.exports = class HomeView extends View
     popup.on 'shown', => tracking.$('input').first().focus()
 
   # **private**
-  # Search for providers updates
+  # Search for providers updates.
+  # Displays progress inside a popup
   #
   # @param event [Event] cancelled click event
-  _onRefresh: (event) =>
+  _onRefreshPopup: (event) =>
     event?.preventDefault()
-    service.seekUpdates (err, results) =>
+
+    # display progress in a popup
+    popup = util.popup @i18n.titles.update, @i18n.msgs.updateInProgress
+    popup.find('.modal-body').append new ProgressView().$el
+
+    # trigger update and render competitions
+    service.update (err, results) =>
       console.log 'new results found:', results
+      @renderCompetitions()
+      # close popup with a slight delay to show progress
+      _.delay ->
+        popup.modal 'hide'
+      , 1000
 
-  # Tracking progress handler
-  # Display tracking progression while events are comming
-  _onProgress: (state, details) =>
-    panel = @$ '.progress-panel'
-    unless panel.hasClass 'in'
-      panel.addClass 'in'
-      @progress.css width: 0
-      @details.empty().append @i18n.msgs.trackingStart
+  # **private**
+  # Remove a tracked couple, and render the page when done.
+  #
+  # @param event [Event] cancelled click event
+  _onUntrack: (event) =>
+    event.preventDefault()
+    # select all checked couples
+    selected = ($(selected).closest('li').data 'name' for selected in @$ '.tracked :checked')
+    return unless selected.length > 0
+    # display a confirmation popup
+    util.popup @i18n.titles.confirm, _.sprintf(@i18n.msgs.untrack, selected.join('<br>')), [
+      text: @i18n.buttons.no
+    ,
+      text: @i18n.buttons.yes
+      className: 'btn-warning'
+      click: =>
+        service.untrack selected, @renderTracked
+    ]
 
-    switch state
-      when 'start'
-        console.log "tracking starts !"
-        @totalComps = null
-        @currentComp = 0
-      when 'compRetrieved'
-        console.log "retrieved #{details.num} competitions"
-        # arbitrary add 5% 
-        width = 0.5
-        unless @totalComps?
-          @totalComps = details.num
-        else
-          @totalComps += details.num
-          # expand the total number of competitions + 5%
-          width += @currentComp
-        @progress.css width: "#{width*100/@totalComps}%"
-        @details.append _.sprintf @i18n.msgs.competitionRetrieved, details.name, details.num,
-      when 'compStart'
-        console.log "analyse of #{details.place} begins"
-        @details.append _.sprintf @i18n.msgs.competitionInProgress, details.id, details.place, details.date.format @i18n.dateFormat
-      when 'contestsRetrieved'
-        console.log "retrieved #{details.total} contests in #{details.competition.place}"
-        @details.find(".#{details.competition.id} .total").html details.total
-      when 'contestEnd'
-        console.log "analyzed #{details.done} contests in #{details.competition.place}"
-        @details.find(".#{details.competition.id} .done").html details.done
-      when 'compEnd'
-        console.log "analyse of #{details.place} ends"
-        @currentComp++
-        @progress.css width: "#{@currentComp*100/@totalComps}%"
-        @details.find(".#{details.id}").replaceWith _.sprintf @i18n.msgs.competitionAnalyzed, details.place, details.date.format @i18n.dateFormat
-      when 'end'
-        console.log "tracking ends !"
-        @progress.css width: '100%'
-        @details.append @i18n.msgs.trackingEnd
-        _.delay =>
-          @$('.progress-panel').removeClass 'in'
-        , 1000
+  # **private**
+  # Remove a competition, and render the page when done.
+  #
+  # @param event [Event] cancelled click event
+  _onRemove: (event) =>
+    event.preventDefault()
+     # select all checked competitions
+    ids = []
+    names = []
+    for selected in @$ '.competitions :checked'
+      competition = $(selected).closest 'li'
+      names.push competition.find('.name').text()
+      ids.push competition.data 'id'
 
-    pos = @details.scrollTop()
-    height = @details[0].scrollHeight - @details.outerHeight()
-    lineHeight = @details.children().first().outerHeight()
-    # scroll to bottom, only if the scroller is already at bottom
-    @details.scrollTop height+lineHeight if pos+lineHeight >= height
+    return unless ids.length > 0
+    # display a confirmation popup
+    util.popup @i18n.titles.confirm, _.sprintf(@i18n.msgs.remove, names.join('<br>')), [
+      text: @i18n.buttons.no
+    ,
+      text: @i18n.buttons.yes
+      className: 'btn-warning'
+      click: =>
+        service.remove ids, @renderCompetitions
+    ]
+
+  # **private**
+  # Navigate to the Couple details page.
+  #
+  # @param event [Event] cancelled click event
+  _onOpenCouple: (event) =>
+    # ignore checkbox selection
+    if $(event?.target).is ':checkbox'
+      return @$('.untrack').toggleClass 'hidden', @$('.tracked :checked').length is 0
+    event.preventDefault()
+    router.navigate 'couple', $(event.target).closest('li').data 'name'
+
+  # **private**
+  # Navigate to the Competition details page.
+  #
+  # @param event [Event] cancelled click event
+  _onOpenCompetition: (event) =>
+    # ignore checkbox selection
+    if $(event?.target).is ':checkbox'
+      return @$('.remove').toggleClass 'hidden', @$('.competitions :checked').length is 0
+    event.preventDefault()
+    router.navigate 'competition', $(event.target).closest('li').data 'id'
 
   # Display new results while they are retrieved
   #
@@ -195,36 +242,3 @@ module.exports = class HomeView extends View
     @resultTimeout = _.delay ->
       panel.children().alert 'close'
     , rankingDelay
-
-  # **private**
-  # Remove a tracked couple, and render the page when done.
-  #
-  # @param event [Event] cancelled click event
-  _onUntrackCouple: (event) =>
-    event.preventDefault()
-    name = $(event.target).closest('li').data 'name'
-    # display a confirmation popup
-    util.popup @i18n.titles.confirm, _.sprintf(@i18n.msgs.untrack, name), [
-      text: @i18n.buttons.no
-    ,
-      text: @i18n.buttons.yes
-      className: 'btn-warning'
-      click: =>
-        service.untrack [name], @renderList
-    ]
-
-  # **private**
-  # Navigate to the Couple details page.
-  #
-  # @param event [Event] cancelled click event
-  _onDisplayCouple: (event) =>
-    event.preventDefault()
-    router.navigate 'couple', $(event.target).closest('li').data 'name'
-
-  # **private**
-  # Navigate to the Competitions details page.
-  #
-  # @param event [Event] cancelled click event
-  _onCompetitions: (event) =>
-    event.preventDefault()
-    router.navigate 'competitions'

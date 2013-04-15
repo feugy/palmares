@@ -9,6 +9,7 @@ cheerio = require 'cheerio'
 md5 = require('md5').digest_s
 Provider = require './provider'
 Competition = require '../model/competition'
+util = require '../util/common'
 
 # Extract national competitions from the Ballroom Dancing National Federation
 module.exports = class WDSFProvider extends Provider
@@ -27,6 +28,7 @@ module.exports = class WDSFProvider extends Provider
     request
       # to avoid encoding problems
       url: _.sprintf "#{@opts.url}/#{@opts.list}", moment().year()-1, moment().year()
+      proxy: util.confKey 'proxy', ''
     , (err, res, body) =>
       if !(err?) and res?.statusCode isnt 200
         err = new Error "failed to fetch results from '#{@opts.name}': #{res.statusCode}\n#{body}"
@@ -47,6 +49,7 @@ module.exports = class WDSFProvider extends Provider
     # request contests list
     request
       url: competition.url
+      proxy: util.confKey 'proxy', ''
     , (err, res, body) =>
       if !(err?) and res?.statusCode isnt 200
         err = new Error "failed to fetch contests from '#{@opts.name} #{competition.place}': #{res.statusCode}\n#{body}"
@@ -98,6 +101,7 @@ module.exports = class WDSFProvider extends Provider
   _extractRanking: (competition, url, callback) =>
     request
       url: url
+      proxy: util.confKey 'proxy', ''
     , (err, res, body) =>
       # http error for the contest detail
       if !(err?) and res?.statusCode isnt 200
@@ -108,13 +112,15 @@ module.exports = class WDSFProvider extends Provider
       $ = cheerio.load body.toString()
       results = 
         # competition's title
-        title: $('h1').text().replace 'Ranking of ', ''
+        title: $('h1').first().text().replace 'Ranking of ', ''
         results: {}
 
       # for each heat (first is final)
       for heat in $ '.list'
         for row in $(heat).find 'tbody > tr'
-          results.results[_.titleize _.stripTags($(row).find('td:nth-child(2)').html()).toLowerCase()] = parseInt $(row).find('td:nth-child(1)').text()
+          name = $(row).find('td:nth-child(2)').text()
+          rank = $(row).find('td:nth-child(1)').text()
+          results.results[_.titleize util.removeAccents name] = parseInt rank
 
       competition.contests.push results
       @emit 'progress', 'contestEnd', competition: competition, done: competition.contests.length

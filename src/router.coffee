@@ -9,12 +9,16 @@ Storage = require './service/localstorage'
 PalmaresService = require './service/palmares'
 HomeView = require './view/home'
 CoupleView = require './view/couple'
-CompetitionsView = require './view/competitions'
-
-i18n = require '../nls/common.yml'
+CompetitionView = require './view/competition'
+AboutView = require './view/about'
+ui = require './util/ui'
+util = require './util/common'
 
 # The Router manage navigation between views inside th GUI
 module.exports = class Router extends EventEmitter
+
+  # i18n utility
+  i18n: require '../nls/common.yml'
 
   # competitions provider
   providers: []
@@ -25,24 +29,34 @@ module.exports = class Router extends EventEmitter
   # list of known routes and their corresponding method
   routes: 
     'home': ->
-      $('#main').empty().append new HomeView().$el
+      $('#main').empty().scrollTop(0).append new HomeView().$el
     'couple': (name) ->
-      $('#main').empty().append new CoupleView(name).$el
-    'competitions': (name) ->
-      $('#main').empty().append new CompetitionsView().$el
+      $('#main').empty().scrollTop(0).append new CoupleView(name).$el
+    'competition': (id) ->
+      $('#main').empty().scrollTop(0).append new CompetitionView(id).$el
 
   # Router constructor: initialize services and run home view.
   constructor: ->
     #set main window title
-    gui.Window.get().title = i18n.titles.application
+    gui.Window.get().title = @i18n.titles.application
+    $('header h1').html @i18n.titles.application
     # build providers
     @providers = [
       new FFDS util.confKey 'providers.FFDS'
       new WDSF util.confKey 'providers.WDSF'
     ]
-    @service = new PalmaresService new Storage(), @providers, _.extend {appTitle: i18n.titles.application}, i18n.export
+    @service = new PalmaresService new Storage(), @providers, _.extend {appTitle: @i18n.titles.application}, @i18n.export
     global.service = @service
     global.searchProvider = @providers[0]
+    # add configuration and credits view
+    $('.parameters').addClass('btn-group').html("""
+      <a class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-cog"></i><span class="caret"></span></a>
+      <ul class="dropdown-menu">
+        <li><a class="settings">#{@i18n.buttons.settings}</a></li>
+        <li><a class="about"  >#{@i18n.buttons.about}</a></li>
+      </ul>""")
+      .on('click', '.settings', @_onSettings)
+      .on 'click', '.about', @_onAbout
     @navigate 'home'
 
   # Trigger a given route, passing relevant arguments
@@ -59,3 +73,37 @@ module.exports = class Router extends EventEmitter
     else 
       throw new Error "unknown route #{path}"
     @emit 'navigate', path: path
+
+  # **private**
+  # Display a popup for settings. 
+  # Proxy is the only supported settings for now
+  #
+  # @param event [Event] optionnal cancelled click event
+  _onSettings: (event) =>
+    event?.preventDefault()
+    settings = ui.popup @i18n.titles.settings, """
+      <form class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label">#{@i18n.labels.proxy}</label>
+          <div class="controls">
+            <input class="proxy" value="#{util.confKey 'proxy', ''}">
+          </div>
+        </div>
+      </form>
+    """, [
+      text: @i18n.buttons.cancel
+    ,
+      text: @i18n.buttons.save
+      className: 'btn-primary'
+      click: =>
+        # save new configuration values
+        util.saveKey 'proxy', settings.find('.proxy').val().trim() or undefined
+    ]
+
+  # **private**
+  # Display a popup for credits. 
+  #
+  # @param event [Event] optionnal cancelled click event
+  _onAbout: (event) =>
+    event?.preventDefault()
+    ui.popup @i18n.titles.about, new AboutView().$el

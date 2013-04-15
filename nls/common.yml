@@ -1,33 +1,37 @@
 titles:
   application: Palmarès
-  welcome: Bienvenue dans Palmarès !
   tracked: Couples suivis
+  competitions: Compétitions
   trackCouples: Ajouter des couples
   trackError: Erreur lors du suivi
-  couple: Palmarès de l'année
   confirm: Confirmation
+  update: Mise à jour des compétitions
   exportError: "Erreur d'exportation"
+  settings: Paramètres
+  about: A propos
 
 buttons:
   yes: Oui
   no: Non
   cancel: Annuler
   track: Ajouter des couples
-  untrack: Enlever
   add: Ajouter
   home: Retour
   export: Exporter
   refresh: Mettre à jour
-  competitions: Compétitions
+  settings: Paramètres
+  about: A propos
+  save: Sauver
+
+labels:
+  proxy: "Proxy :"
 
 msgs:
   loading: chargement en cours...
-  noCompetition: Aucun résultat de compétition disponible.
-  tracked: >
-    Ajoutez des couples a suivre: leur palmarès de l'année sera établi et automatiquement mis à jour.
-  noTracked: 'Actuellement, aucun couple suivi.'
-  noPalmares: Ce couple n'a participé à aucune compétition connue
-  noCompetitions: >
+  noTracked: >
+    <p>Actuellement, aucun couple suivi.</p>
+    <p>Ajoutez des couples a suivre: leur palmarès de l'année sera établi et automatiquement mis à jour.</p>
+  noCompetition: >
     <p>Aucune compétition analysée pour l'instant.<p>
     <p>Sur la page d'accueil, utilisez le bouton de mise à jour, ou ajouter des couples à suivre.</p>
   chooseCouple: >
@@ -38,11 +42,13 @@ msgs:
     <p>Vous pouvez aussi suivre tous les couples actifs d'un club (ville, '/', sigle) :</p>
     <blockquote>Paris/PDSC</blockquote>
   untrack: >
-    <p>Souhaitez vous vraiment ne plus suivre <span class="text-warning"><strong>%1$s</strong></span> ?<p>
+    <p>Souhaitez vous vraiment ne plus suivre les couples suivants ?</p>
+    <p class="text-warning">%1$s</p>
     <p>Vous pourrez toujours les rajouter à nouveau plus tard.</p>
-  removeCompetition: >
-    <p>Souhaitez vous vraiment supprimer la compétition <span class="text-warning"><strong>%1$s</strong></span> ?<p>
-    <p>Elle sera de nouveau analysée lors de la prochaine mise à jour.</p>
+  remove: >
+    <p>Souhaitez vous vraiment supprimer les compétitions suivantes ?</p>
+    <p class="text-warning">%1$s</p>
+    <p>Elles seront de nouveau analysées lors de la prochaine mise à jour.</p>
   trackingStart: <div>Récupération des compétitions</div>
   trackingEnd: <div>Etablissement des palmarès</div>
   competitionRetrieved: > 
@@ -55,6 +61,7 @@ msgs:
   validCouple: le nom semble bon !
   foundInGroup: '%1$s couple(s) trouvé(s) !'
   searchInProgress: 'consultation en cours...'
+  updateInProgress: '<p>récupération des dernières compétitions en cours, veillez patienter...</p>'
 
 errors:
   track: >
@@ -69,6 +76,10 @@ errors:
     <p>Nous sommes désolé : l'export Excell ne peut être réalisé.</p>
     <p>L'erreur suivante est survenue :</p>
     <blockquote>%1s</blockquote>
+  noPalmares: >
+    <div class="alert alert-warning">Ce couple n'a participé à aucune compétition connue</div>
+  noContests: >
+    <div class="alert alert-warning">Cette compétition ne contient aucun résultat</div>
 
 export:
   globalSheet: Par compétition
@@ -78,4 +89,20 @@ export:
   contest: Catégorie
   lat: Latines
   std: Standards
+
+about:
+  version: 'Version 1.0.0,  15/04/2013'
+  description: >
+    <img src="img/ribas.png">
+    <p>Développé pour le Club Villeurbannais de Danse Sportive, cette application permet en un seul coup d'oeil de consulter les résultat nationnaux et internationnaux de danse sportive, et de suivre vos couples préférés en établissant leur palmares.</p>
+    <p>Les informations sont récupérés sur les pages web publiques des fournisseurs suivants :</p>
+  contact: >
+    <p>Conception réalisation et design par Damien Feugas <em>damien.feugas@gmail.com</em></p>
+    <p class="copyright">Copyright 2013 © Damien Feugas</p>
+  providers:
+    - name: Fédération Française de Danse Sportive 
+      credits: Copyright 2009 © FFD-CNSDS. Tous droits réservés <em>www.ffddansesportive.com</em>
+    - name: World DanseSport federation
+      credits: © Copyright WDSF 2010-2012 All rights Reserved <em>www.worlddancesport.org</em>
+
 dateFormat: DD/MM/YY

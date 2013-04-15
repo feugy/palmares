@@ -113,7 +113,7 @@ describe 'Palmares service tests', ->
       expect(res.toJSON()).to.deep.equal
         couple: couples[0]
         kind: 'lat'
-        contest: 'Compétition à points Juniors II E Latines'
+        contest: 'Juniors II E Latines'
         rank: 5
         total: 14
       res = _.find competition.results, (r) -> r.couple is couples[1]
@@ -121,7 +121,7 @@ describe 'Palmares service tests', ->
       expect(res.toJSON()).to.deep.equal
         couple: couples[1]
         kind: 'lat',
-        contest: 'Compétition à points Adultes E Latines',
+        contest: 'Adultes E Latines',
         rank: 4,
         total: 9
 
@@ -129,12 +129,12 @@ describe 'Palmares service tests', ->
       competition = _.find results, (r) -> r.competition.id is 'e3a7748ff934c9020e76fd9748220192'
       expect(competition).to.be.defined
       expect(competition.results).to.have.length 2
-      res = _.find competition.results, (r) -> r.contest is 'Compétition à points Juniors II E Latines'
+      res = _.find competition.results, (r) -> r.contest is 'Juniors II E Latines'
       expect(res).to.be.defined
       expect(res.toJSON()).to.deep.equal
         couple: couples[0]
         kind: 'lat'
-        contest: 'Compétition à points Juniors II E Latines'
+        contest: 'Juniors II E Latines'
         rank: 5
         total: 28 
       res = _.find competition.results, (r) -> r.contest is 'Open Juvéniles I Juvéniles II Juniors I Juniors II C D E Latines'
@@ -154,17 +154,17 @@ describe 'Palmares service tests', ->
         expect(JSON.parse JSON.stringify value[1].palmares.a281637604e1ac8ffd1eeb51e58e7adf).to.deep.equal [ 
           couple: couples[0]
           kind: 'lat'
-          contest: 'Compétition à points Juniors II E Latines'
+          contest: 'Juniors II E Latines'
           rank: 5
           total: 14
         ]
         expect(value[1].palmares).to.have.property 'e3a7748ff934c9020e76fd9748220192'
         expect(value[1].palmares.e3a7748ff934c9020e76fd9748220192).to.have.length 2 
-        res = _.find value[1].palmares.e3a7748ff934c9020e76fd9748220192, (r) -> r.contest is 'Compétition à points Juniors II E Latines'
+        res = _.find value[1].palmares.e3a7748ff934c9020e76fd9748220192, (r) -> r.contest is 'Juniors II E Latines'
         expect(res.toJSON()).to.deep.equal 
           couple: couples[0]
           kind: 'lat'
-          contest: 'Compétition à points Juniors II E Latines'
+          contest: 'Juniors II E Latines'
           rank: 5
           total: 28 
         res = _.find value[1].palmares.e3a7748ff934c9020e76fd9748220192, (r) -> r.contest is 'Open Juvéniles I Juvéniles II Juniors I Juniors II C D E Latines'
@@ -180,7 +180,7 @@ describe 'Palmares service tests', ->
           a281637604e1ac8ffd1eeb51e58e7adf: [ 
             couple: couples[1]
             kind: 'lat',
-            contest: 'Compétition à points Adultes E Latines',
+            contest: 'Adultes E Latines',
             rank: 4,
             total: 9
           ]
@@ -244,7 +244,7 @@ describe 'Palmares service tests', ->
 
   it 'should not detect updates without new competitions', (done) ->
     # when seeking updates while no new competition available
-    service.seekUpdates (err, results) ->
+    service.update (err, results) ->
       return done "failed to seek updates: #{err}" if err?
       # then no new results found nor event issued
       expect(results).to.have.length 0
@@ -255,7 +255,7 @@ describe 'Palmares service tests', ->
     # given a competition update
     withNew = true
     # when seeking updates while new competitions available
-    service.seekUpdates (err, results) ->
+    service.update (err, results) ->
       return done "failed to seek updates: #{err}" if err?
       expect(results).to.have.length 1
       
@@ -264,19 +264,19 @@ describe 'Palmares service tests', ->
       expect(results[0].competition.place).to.equal 'Bagnols-sur-cèze (30)'
       expect(results[0].competition.date.unix()).to.equal moment('2013-03-31').unix()
       expect(results[0].results).to.have.length 2
-      res = _.find results[0].results, (r) -> r.contest is 'Compétition à points Juniors II E Latines'
+      res = _.find results[0].results, (r) -> r.contest is 'Juniors II E Latines'
       expect(res.toJSON()).to.deep.equal 
         couple: couples[0]
         kind: 'lat',
-        contest: 'Compétition à points Juniors II E Latines',
+        contest: 'Juniors II E Latines',
         rank: 8,
         total: 21
 
-      res = _.find results[0].results, (r) -> r.contest is 'Compétition à points Adultes E Standard'
+      res = _.find results[0].results, (r) -> r.contest is 'Adultes E Standard'
       expect(res.toJSON()).to.deep.equal 
         couple: couples[1]
         kind: 'std',
-        contest: 'Compétition à points Adultes E Standard',
+        contest: 'Adultes E Standard',
         rank: 4,
         total: 7
 
@@ -303,14 +303,6 @@ describe 'Palmares service tests', ->
         ]
         done()
 
-  it 'should competitions be retrieved', ->
-    competitions = service.getCompetitions()
-    expect(competitions).to.have.length 4
-    expect(competitions[3]).to.have.property 'id', 'a281637604e1ac8ffd1eeb51e58e7adf'
-    expect(competitions[2]).to.have.property 'id', '670df6fb520ef609820ed2920828eb10'
-    expect(competitions[1]).to.have.property 'id', 'e3a7748ff934c9020e76fd9748220192'
-    expect(competitions[0]).to.have.property 'id', '4ca82205bf98ae50dc4beede80be8370'
-
   it 'should global palmares be exported', (done) ->
     service.export (err, xlsx) ->
       return done "failed to export global palmares: #{err}" if err?
@@ -324,8 +316,8 @@ describe 'Palmares service tests', ->
         ['', 'Bourg En Bresse', '19/01/2013']
         []
         ['', 'Couple', 'Résultat', 'Catégorie', 'Latines', 'Standards']
-        ['', couples[1], '4/9', 'Compétition à points Adultes E Latines', 'x', '']
-        ['', couples[0], '5/14', 'Compétition à points Juniors II E Latines', 'x', '']
+        ['', couples[1], '4/9', 'Adultes E Latines', 'x', '']
+        ['', couples[0], '5/14', 'Juniors II E Latines', 'x', '']
         []
         ['', 'Bourg En Bresse', '02/03/2013']
         []
@@ -335,14 +327,14 @@ describe 'Palmares service tests', ->
         ['', 'Bagnols-sur-cèze (30)', '30/03/2013']
         []
         ['', 'Couple', 'Résultat', 'Catégorie', 'Latines', 'Standards']
-        ['', couples[0], '5/28', 'Compétition à points Juniors II E Latines', 'x', '']
+        ['', couples[0], '5/28', 'Juniors II E Latines', 'x', '']
         ['', couples[0], '30/70', 'Open Juvéniles I Juvéniles II Juniors I Juniors II C D E Latines', 'x', '']
         []
         ['', 'Bagnols-sur-cèze (30)', '31/03/2013']
         []
         ['', 'Couple', 'Résultat', 'Catégorie', 'Latines', 'Standards']
-        ['', couples[1], '4/7', 'Compétition à points Adultes E Standard', '', 'x']
-        ['', couples[0], '8/21', 'Compétition à points Juniors II E Latines', 'x', '']
+        ['', couples[1], '4/7', 'Adultes E Standard', '', 'x']
+        ['', couples[0], '8/21', 'Juniors II E Latines', 'x', '']
         []
       ]
       done()
@@ -359,7 +351,7 @@ describe 'Palmares service tests', ->
       expect(results[0].results[0].toJSON()).to.deep.equal  
         couple: couples[1]
         kind: 'std',
-        contest: 'Compétition à points Adultes E Standard',
+        contest: 'Adultes E Standard',
         rank: 4,
         total: 7
       # then palmares contains all details
@@ -369,7 +361,7 @@ describe 'Palmares service tests', ->
       expect(results[1].results[0].toJSON()).to.deep.equal 
         couple: couples[1]
         kind: 'lat',
-        contest: 'Compétition à points Adultes E Latines',
+        contest: 'Adultes E Latines',
         rank: 4,
         total: 9
       done()
@@ -383,17 +375,29 @@ describe 'Palmares service tests', ->
       done()
   
   it 'should competitions be removed', (done) ->
-    service.removeCompetition '670df6fb520ef609820ed2920828eb10', (err) =>
+    expect(_.keys(service.competitions).sort()).to.deep.equal [
+      '4ca82205bf98ae50dc4beede80be8370'
+      '670df6fb520ef609820ed2920828eb10'
+      'a281637604e1ac8ffd1eeb51e58e7adf'
+      'e3a7748ff934c9020e76fd9748220192'
+    ]
+    service.remove ['unknown', '670df6fb520ef609820ed2920828eb10'], (err) =>
       return done "failed to remove competition: #{err}" if err?
-
+      # then competition storage does not contain removed competition anymore
       storage.pop 'competitions', (err, value) ->
         return done "failed to read competitions in storage: #{err}" if err?
-        expect(_.keys value).to.deep.equal [
+        expect(_.keys(value).sort()).to.deep.equal [
+          '4ca82205bf98ae50dc4beede80be8370'
           'a281637604e1ac8ffd1eeb51e58e7adf'
           'e3a7748ff934c9020e76fd9748220192'
-          '4ca82205bf98ae50dc4beede80be8370'
         ]
-        done()
+        # then couple storage does not contain competition anymore
+        storage.pop 'tracked', (err, value) ->
+          return done "failed to read tracked in storage: #{err}" if err?
+          expect(value).to.have.length 3
+          expect(value[1].name).to.equal couples[2]
+          expect(value[1].palmares).not.to.have.property '670df6fb520ef609820ed2920828eb10'
+          done()
         
   it 'should existing couple be untrack', (done) ->
     service.untrack [couples[1]], (err) ->
@@ -407,7 +411,7 @@ describe 'Palmares service tests', ->
         expect(value[1].palmares).to.have.property 'e3a7748ff934c9020e76fd9748220192'
         expect(value[1].palmares).to.have.property '4ca82205bf98ae50dc4beede80be8370'
         expect(value[0].name).to.equal couples[2]
-        expect(value[0].palmares).to.have.property '670df6fb520ef609820ed2920828eb10'
+        expect(value[0].palmares).to.be.empty
         done()
 
   it 'should unexisting couple untrack not fail', (done) ->
@@ -422,5 +426,5 @@ describe 'Palmares service tests', ->
         expect(value[1].palmares).to.have.property 'e3a7748ff934c9020e76fd9748220192'
         expect(value[1].palmares).to.have.property '4ca82205bf98ae50dc4beede80be8370'
         expect(value[0].name).to.equal couples[2]
-        expect(value[0].palmares).to.have.property '670df6fb520ef609820ed2920828eb10'
+        expect(value[0].palmares).to.be.empty
         done()

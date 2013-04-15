@@ -21,14 +21,26 @@ module.exports = class CoupleView extends View
   # event map
   events: 
     'click .home': '_onHome'
+    'click h3': '_onOpenCompetition'
 
-  # Home View constructor
-  # Immediately renders the view
+  # Couple View constructor
+  # Immediately renders the view, after havin g established the couple palmares.
+  #
+  # @param name [String] shown couple name
+  # @return the built view
   constructor: (@name) ->
-    super className: 'couple container'
+    super className: 'details couple'
     # check the couple existence
     service.palmares @name, (err, palmares) =>
-      @palmares = palmares unless err?
+      @name = @name.replace ' - ', '<br/>'
+      unless err?
+        @palmares = (
+          for detail in palmares
+            name: detail.competition.place
+            date: detail.competition.date.format @i18n.dateFormat
+            id: detail.competition.id
+            results: detail.results
+        )
       @render()
 
   # **private**
@@ -37,4 +49,12 @@ module.exports = class CoupleView extends View
   # @param event [Event] cancelled click event
   _onHome: (event) =>
     event?.preventDefault()
-    router.navigate 'home'
+    router.navigate 'home'  
+
+  # **private**
+  # Navigate to the Competition details page.
+  #
+  # @param event [Event] cancelled click event
+  _onOpenCompetition: (event) =>
+    event.preventDefault()
+    router.navigate 'competition', $(event.target).closest('h3').data 'id'

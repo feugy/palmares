@@ -8,6 +8,7 @@ cheerio = require 'cheerio'
 md5 = require('md5').digest_s
 Provider = require './provider'
 Competition = require '../model/competition'
+util = require '../util/common'
 
 # Make names to begin with first name, without accentuated letters and capitalized.
 #
@@ -49,48 +50,16 @@ cleanNames = (names) ->
         else
           first += char
     # capitalize and remove accentuated letters
-    results.push "#{removeAccents first} #{removeAccents last}"
-  name = "#{_.titleize results[0]} - #{_.titleize results[1]}"
-  #console.log name
-  name
-
-# Lowerize and replace accentuated letters by their equivalent
+    results.push "#{util.removeAccents first} #{util.removeAccents last}"
+  "#{_.titleize results[0]} - #{_.titleize results[1]}"
+  
+# Remove useless information from contest titles
 #
-# @param str [String] the replaced string
-# @return its lowercase accent-free version
-removeAccents = (str) ->
-  str = str.toLowerCase().trim()
-  (for char, i in str
-    code = str.charCodeAt i
-    # 224~230: àáâãäåæ
-    if 224 <= code <= 230
-      char = 'a'
-    # 231: ç
-    else if 231 is code
-      char = 'c'
-    # 232~235: èéêë
-    else if 232 <= code <= 235
-      char = 'e'
-    # 236~239: ìíîï
-    else if 236 <= code <= 239
-      char = 'i'
-    # 240: ð
-    else if 240 is code
-      char = 'd'
-    # 241: ñ
-    else if 241 is code
-      char = 'n'
-    # 242~246: òóôõö
-    else if 242 <= code <= 246
-      char = 'o'
-    # 249~252: ùúûü
-    else if 249 <= code <= 252
-      char = 'u'
-    # 253: ý
-    else if 253 is code
-      char = 'y'
-    char
-  ).join ''
+# @param original [String] original contest title
+# @return its cleanned version
+cleanContest = (original) ->
+  original.replace('Compétition à points', '').replace('Compétition sans points', '').trim()
+
 
 # Extract national competitions from the Ballroom Dancing National Federation
 module.exports = class FFDSProvider extends Provider
@@ -119,6 +88,7 @@ module.exports = class FFDSProvider extends Provider
       # to avoid encoding problems
       encoding: 'binary'
       url: "#{@opts.url}/#{@opts.list}"
+      proxy: util.confKey 'proxy', ''
     , (err, res, body) =>
       if !(err?) and res?.statusCode isnt 200
         err = new Error "failed to fetch results from '#{@opts.name}': #{res.statusCode}\n#{body}"
@@ -139,6 +109,7 @@ module.exports = class FFDSProvider extends Provider
       # to avoid encoding problems
       encoding: 'binary'
       url: competition.url
+      proxy: util.confKey 'proxy', ''
     , (err, res, body) =>
       if !(err?) and res?.statusCode isnt 200
         err = new Error "failed to fetch contests from '#{@opts.name} #{competition.place}': #{res.statusCode}\n#{body}"
@@ -173,6 +144,7 @@ module.exports = class FFDSProvider extends Provider
       # to avoid encoding problems
       encoding: 'binary'
       url: "#{@opts.url}/#{@opts.clubs}"
+      proxy: util.confKey 'proxy', ''
     , (err, res, body) =>
       if !(err?) and res?.statusCode isnt 200
         err = new Error "failed to fetch club list from '#{@opts.name}': #{res.statusCode}\n#{body}"
@@ -196,6 +168,7 @@ module.exports = class FFDSProvider extends Provider
         # to avoid encoding problems
         encoding: 'binary'
         url: _.sprintf "#{@opts.url}/#{@opts.couples}", club.id
+        proxy: util.confKey 'proxy', ''
       , (err, res, body) =>
         if !(err?) and res?.statusCode isnt 200
           err = new Error "failed to fetch couple list from '#{@opts.name}' #{club.name}: #{res.statusCode}\n#{body}"
@@ -213,6 +186,7 @@ module.exports = class FFDSProvider extends Provider
       # to avoid encoding problems
       encoding: 'binary'
       url: _.sprintf "#{@opts.url}/#{@opts.search}", encodeURIComponent searched
+      proxy: util.confKey 'proxy', ''
     , (err, res, body) =>
       if !(err?) and res?.statusCode isnt 200
         err = new Error "failed to search couples from '#{@opts.name}': #{res.statusCode}\n#{body}"
@@ -270,6 +244,7 @@ module.exports = class FFDSProvider extends Provider
       # to avoid encoding problems
       encoding: 'binary'
       url: url
+      proxy: util.confKey 'proxy', ''
     , (err, res, body) =>
       # http error for the contest detail
       if !(err?) and res?.statusCode isnt 200
@@ -282,7 +257,7 @@ module.exports = class FFDSProvider extends Provider
       # extract ranking
       $ = cheerio.load body
       results = {}
-      title = $('h3').text()
+      title = cleanContest $('h3').text()
       # for each heat (first is final)
       for heat in $ '.portlet'
         for row in $(heat).find 'tbody > tr'

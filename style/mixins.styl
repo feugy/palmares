@@ -1,6 +1,6 @@
 // cross-browser compatibility
 transition(args...)
-  -wekbit-transition args
+  -webkit-transition args
   transition args
 
 transform(args...)
@@ -54,3 +54,25 @@ box-align(args...)
 box-orient(args...)
   -webkit-box-orient args
   box-orient args
+
+// add a folded corner
+fold-corner(selector, cornerSize, bgColor, isRight = false)
+
+  {selector}:after, {selector}:before
+    content ""
+    position absolute
+    right -(cornerSize) unless isRight
+    left -(cornerSize) if isRight
+
+  {selector}:after
+    background bgColor
+    width cornerSize
+    top 0
+    bottom cornerSize
+
+  {selector}:before
+    border unit(cornerSize/2, 'px') solid transparent
+    border-right-color bgColor if isRight
+    border-left-color bgColor unless isRight
+    border-top-color bgColor 
+    bottom 0

@@ -1,0 +1,14 @@
+<header>
+  <hr class="top">
+  <h1>{{i18n.titles.application}}</h1>
+  <hr class="bottom">
+  <hr class="bottom2">
+</header>
+<div class="version">{{{i18n.about.version}}}</div>
+<div class="description">{{{i18n.about.description}}}</div>
+<ul class="providers">
+  {{#i18n.about.providers}}
+  <li><span class="name">{{{name}}}</span><span class="credits">{{{credits}}}</span></li>
+  {{/i18n.about.providers}}
+</ul>
+<div class="contact">{{{i18n.about.contact}}}</div>

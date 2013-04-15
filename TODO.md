@@ -1,6 +1,5 @@
 # TODO
 
-- mise en forme
-- affichage compétition
-- configuration proxy
-- photo
+- mise en forme des boutons et popup
+- last results
+- bug récupération de nouvelles compétition des deux providers

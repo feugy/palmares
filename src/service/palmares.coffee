@@ -5,6 +5,9 @@ async = require 'async'
 {EventEmitter} = require 'events'
 Ranking = require '../model/ranking'
 
+# security flag to avoid triggering update and tracking at the same time.
+inProgress = false
+
 # This service follows result of tracked couples
 # For a given couple, it parsed all known competitions, and establish a list of rankings
 # When a new competition is added, it updates if necessary results for the tracked couples
@@ -65,6 +68,25 @@ module.exports = class PalmaresService extends EventEmitter
     for provider in @providers
       provider.on 'progress', (args...) => @emit.apply @, ['progress'].concat args
 
+  # Return palmares of track couple, sort by competition date
+  #
+  # @param couple [String] concerned couple name
+  # @param callback [Function] end callback. Invoked with arguments:
+  # @option callback error [Error] an Error object, or null if no error occured
+  # @option callback summary [Array] for each competition were the couple is involved, contains an object with fields:
+  # - competition: the Competition object
+  # - results: an array of one Ranking object.
+  palmares: (couple, callback) =>
+    details = _.find @tracked, (c) -> c.name is couple
+    return callback new Error "couple #{couple} is not tracked" unless details?
+    # enrich stored palmares with competitions data
+    palmares = []
+    for id, results of details.palmares
+      palmares.push 
+        competition: @competitions[id]
+        results: results
+    callback null, palmares.sort (r1, r2) -> r2.competition.date.unix() - r1.competition.date.unix()
+
   # Track new couples.
   # Will retrieve all known competitions to get the couple's result.
   # This heavy operation may takes some time
@@ -76,6 +98,7 @@ module.exports = class PalmaresService extends EventEmitter
   # - competition: the Competition object
   # - results: an array of Ranking objects, one for each involved couple
   track: (couples, callback) =>
+    return callback new Error 'operation already in progress' if inProgress
     # remove already tracked couples
     couples = _.difference couples, _.pluck @tracked, 'name'
     return callback null, [] if couples.length is 0
@@ -91,6 +114,7 @@ module.exports = class PalmaresService extends EventEmitter
 
     end = (err) =>
       @emit 'progress', 'end', err
+      inProgress = false
       return callback err if err?
       # Update storage
       @storage.push 'tracked', @tracked, (err) =>
@@ -99,6 +123,7 @@ module.exports = class PalmaresService extends EventEmitter
 
 
     @emit 'progress', 'start'
+    inProgress = true
     # reuse stored competitions if possible
     available = _.keys(@competitions)?.length
     if available > 0
@@ -141,7 +166,9 @@ module.exports = class PalmaresService extends EventEmitter
   # @option callback summary [Array] for each new competition were tracked couples were involved, contains an object with fields:
   # - competition: the Competition object
   # - results: an array of Ranking objects, one for each involved couple
-  seekUpdates: (callback) =>
+  update: (callback) =>
+    return callback new Error 'operation already in progress' if inProgress
+    inProgress = true
     # ids of already analyzed competitions
     existing = _.keys @competitions
     results = []
@@ -170,6 +197,7 @@ module.exports = class PalmaresService extends EventEmitter
         , next
     , (err) =>
       @emit 'progress', 'end', err
+      inProgress = false
       return callback err if err?
       # nothing new.
       return callback null, [] if newCompetitions.length is 0
@@ -185,42 +213,44 @@ module.exports = class PalmaresService extends EventEmitter
           console.error "failed to add new tracked couples: #{err}" if err?
           callback null, results
 
-  # Return palmares of track couple, sort by competition date
+  # Remove couples from the tracked list.
+  # If some couple was not track, does not fail.
   #
-  # @param couple [String] concerned couple name
+  # @param names [Array] concerned couple names
   # @param callback [Function] end callback. Invoked with arguments:
   # @option callback error [Error] an Error object, or null if no error occured
-  # @option callback summary [Array] for each competition were the couple is involved, contains an object with fields:
-  # - competition: the Competition object
-  # - results: an array of one Ranking object.
-  palmares: (couple, callback) =>
-    details = _.find @tracked, (c) -> c.name is couple
-    return callback new Error "couple #{couple} is not tracked" unless details?
-    # enrich stored palmares with competitions data
-    palmares = []
-    for id, results of details.palmares
-      palmares.push 
-        competition: @competitions[id]
-        results: results
-    callback null, palmares.sort (r1, r2) -> r2.competition.date.unix() - r1.competition.date.unix()
+  untrack: (names, callback) =>
+    for name in names
+      for couple, i in @tracked when couple.name is name
+        @tracked.splice i, 1
+        break
+    # Update storage
+    @storage.push 'tracked', @tracked, (err) =>
+      console.error "failed to remove tracked couples: #{err}" if err?
+      callback null
 
-  # Returns available competitions
+  # Removes some competitions from provider, making it elligible to further updates
   #
-  # @return available competitions
-  getCompetitions: =>
-    _.chain(@competitions).values().sortBy('date').value().reverse()
-
-  # Removes a competition from provider, making it elligible to further updates
-  #
-  # @param id [String] removed competition's id
+  # @param ids [Array] list of removed competition's id
   # @param callback [Function] end callback. Invoked with arguments:
   # @option callback error [Error] an Error object, or null if no error occured
-  removeCompetition: (id, callback) =>
-    return callback null unless id of @competitions
-    delete @competitions[id]
-    @storage.push 'competitions', @competitions, (err) =>
-      console.error "failed to remove competition #{id}: #{err}" if err?
-      return callback null
+  remove: (ids, callback) =>
+    update = false
+    for id in ids when id of @competitions
+      update = true
+      # remove from competition list
+      delete @competitions[id]
+      # remove also from individual palmares
+      delete couple.palmares[id] for couple in @tracked when id of couple.palmares
+
+    return callback null unless update
+
+    # update storages
+    @storage.push 'tracked', @tracked, (err) =>
+      console.error "failed to remove tracked couples: #{err}" if err?
+      @storage.push 'competitions', @competitions, (err) =>
+        console.error "failed to remove competition #{id}: #{err}" if err?
+        return callback null
 
   # Export global palmares to XlsX.js compliant format.
   # Each competition is summarized with all related couples and their rankings
@@ -257,22 +287,6 @@ module.exports = class PalmaresService extends EventEmitter
         sheet.data.push []
 
     callback null, xlsx
-
-  # Remove couples from the tracked list.
-  # If some couple was not track, does not fail.
-  #
-  # @param names [Array] concerned couple names
-  # @param callback [Function] end callback. Invoked with arguments:
-  # @option callback error [Error] an Error object, or null if no error occured
-  untrack: (names, callback) =>
-    for name in names
-      for couple, i in @tracked when couple.name is name
-        @tracked.splice i, 1
-        break
-    # Update storage
-    @storage.push 'tracked', @tracked, (err) =>
-      console.error "failed to remove tracked couples: #{err}" if err?
-      callback null
 
   # **private**
   # Analyze a given competition to enrich the specified couples' palmared

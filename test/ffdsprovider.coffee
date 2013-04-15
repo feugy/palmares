@@ -143,7 +143,7 @@ describe 'FFDS provider tests', ->
 
       expect(competition).to.have.property 'contests'
       expect(competition.contests).to.have.length 9
-      contest = _.find competition.contests, (contest) -> contest.title is 'Compétition à points Juvéniles II E Latines'
+      contest = _.find competition.contests, (contest) -> contest.title is 'Juvéniles II E Latines'
       expect(contest).to.exist
       expect(contest.results).to.deep.equal
         'Danny Huck - Louise Jamm': 1

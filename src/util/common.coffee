@@ -51,7 +51,7 @@ emitter.isA = (obj, clazz) ->
   false
 
 # Read a configuration key inside the YAML configuration file (utf-8 encoded).
-# At first call, performs a synchronous disk access, because configuraiton is very likely to be read
+# At first call, performs a synchronous disk access, because configuration is very likely to be read
 # before any other operation. The configuration is then cached.
 # 
 # The configuration file read is named 'xxx-conf.yaml', where xxx is the value of NODE_ENV (dev if not defined) 
@@ -77,4 +77,74 @@ emitter.confKey = (key, def) ->
       # last step: returns value
       return obj[step]
 
+# Save a configuration key inside the YAML configuration file (utf-8 encoded).
+# Performs a synchronous disk access, because configuration changes are very likely to be blockant for the rest of the execution.
+# 
+# A `confChanged` event is triggered
+#
+# @param key [String] the path to the requested key, splited with dots.
+# @param value [Object] the new value. Undefined to unset the key
+# @return the expected key.
+emitter.saveKey = (key, value) ->
+  path = key.split '.'
+  obj = conf
+  last = path.length-1
+  for step, i in path
+    # add missing objects
+    obj[step] = {} unless step of obj or i is last
+      
+    if i is last
+      # last step: set value
+      if value is undefined
+        delete obj[step]
+      else
+        obj[step] = value
+    else
+      # goes deeper
+      obj = obj[step]
+
+  # synchronously save configuration
+  try 
+    fs.writeFileSync confPath, yaml.safeDump(conf), 'utf-8'
+  catch err
+    throw new Error "Cannot write configuration file '#{confPath}': #{err}"
+
+# Lowerize and replace accentuated letters by their equivalent
+#
+# @param str [String] the replaced string
+# @return its lowercase accent-free version
+emitter.removeAccents = (str) ->
+  str = str.toLowerCase().trim()
+  (for char, i in str
+    code = str.charCodeAt i
+    # 224~230: àáâãäåæ
+    if 224 <= code <= 230
+      char = 'a'
+    # 231: ç
+    else if 231 is code
+      char = 'c'
+    # 232~235: èéêë
+    else if 232 <= code <= 235
+      char = 'e'
+    # 236~239: ìíîï
+    else if 236 <= code <= 239
+      char = 'i'
+    # 240: ð
+    else if 240 is code
+      char = 'd'
+    # 241: ñ
+    else if 241 is code
+      char = 'n'
+    # 242~246: òóôõö
+    else if 242 <= code <= 246
+      char = 'o'
+    # 249~252: ùúûü
+    else if 249 <= code <= 252
+      char = 'u'
+    # 253: ý
+    else if 253 is code
+      char = 'y'
+    char
+  ).join ''
+  
 module.exports = emitter

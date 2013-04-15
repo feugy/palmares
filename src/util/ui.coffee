@@ -16,13 +16,13 @@ module.exports =
   # @option buttons click [Function] the button handler. Can cancel closure if false is returned
   # @param closeIndex [Number] index in the buttons array of the handler invoked when using the popup close button, 0 by default
   # @return the generated popup dialog
-  popup: (title, message, buttons = [], closeIndex = 0) ->
+  popup: (title, message = '', buttons = [], closeIndex = 0) ->
     # parameter validations
     throw new Error "closeIndex #{closeIndex} is not a valid index in the buttons array" unless closeIndex >= 0 and (closeIndex < buttons.length or buttons.length is 0)
     
     html = "<div class='modal hide fade'><div class='modal-header'>
       <button type='button' data-dismiss='modal' class='close'>&times;</button><h3>#{title}</h3></div>
-      <div class='modal-body'>#{message}</div><div class='modal-footer'>"
+      <div class='modal-body'></div><div class='modal-footer'>"
 
     for spec, i in buttons
       html += "<a data-idx='#{i}' class='btn #{if spec.className? then spec.className else ''}' href='#''>"
@@ -31,6 +31,7 @@ module.exports =
 
     html += "</div></div>"
     popup = $(html)
+    popup.find('.modal-body').append message
 
     popup.modal().on('hide', (event) -> 
       return if popup.preventClose

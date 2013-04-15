@@ -40,7 +40,7 @@
   "window": {
     "toolbar": false,
     "show": false,
-    "min_width": 500,
-    "min_height": 900
+    "min_width": 900,
+    "min_height": 600
   }
 }

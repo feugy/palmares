@@ -36,8 +36,10 @@ module.exports = class HomeView extends View
   events: 
     'keyup input': '_onCheckName'
 
-  # Home View constructor
+  # Tracking View constructor
   # Immediately renders the view
+  #
+  # @return the built view
   constructor: ->
     super className: 'track'
     @couples = []
