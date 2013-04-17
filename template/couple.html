@@ -1,19 +1,21 @@
 <h2 class="box"><span class="text">{{{name}}}</span><span class="image"></span></h2>
-<a class="home btn btn-primary btn-large" href="#"><i class="icon-home"></i>{{i18n.buttons.home}}</a>
-{{^palmares}}
-{{i18n.msgs.noPalmares}}
-{{/palmares}}
-{{#palmares}}
-<article>
-  <h3 data-id="{{id}}"><span class="date">{{date}}</span><span class="place">{{name}}</span></h3>
-  <ul>
-    {{#results}}
-    <li>
-      <span class="contest">{{contest}}</span><hr><span class="result">
-        <span class="rank">{{rank}}</span><span class="total">{{total}}</span>
-      </span>
-    </li>
-    {{/results}}
-  </ul>
-</article>
-{{/palmares}}
+<div class="content">
+  <a class="home btn btn-primary btn-large" href="#"><i class="icon-home"></i>{{i18n.buttons.home}}</a>
+  {{^palmares}}
+  {{i18n.msgs.noPalmares}}
+  {{/palmares}}
+  {{#palmares}}
+  <article>
+    <h3 data-id="{{id}}"><span class="date">{{date}}</span><span class="place">{{name}}</span></h3>
+    <ul>
+      {{#results}}
+      <li>
+        <span class="contest">{{contest}}</span><hr><span class="result">
+          <span class="rank">{{rank}}</span><span class="total">{{total}}</span>
+        </span>
+      </li>
+      {{/results}}
+    </ul>
+  </article>
+  {{/palmares}}
+</div>

@@ -34,6 +34,7 @@ body
   box-sizing border-box
   padding 0
   margin 0
+  overflow hidden
 
   header
     
@@ -96,13 +97,32 @@ body
     display box
     box-orient vertical
 
+
     #main
       box-flex 1
       overflow auto
 
+    #main.leaving
+      
+      .bar
+      .list
+      .content
+        opacity 0
+        transition all 0.3s
+
+      .box:not(.right)
+        visibility hidden
+        animation slideRight enterDuration
+        animation-direction reverse
+
+      .box.right
+        visibility hidden
+        animation slideLeft enterDuration 
+        animation-direction reverse
+
     .box
       position absolute
-      left 0
+      left -5px
       top 100px
       text-align right
       box-sizing border-box
@@ -117,33 +137,56 @@ body
 
       .text
         position relative
-        z-index 1
+        z-index 2
 
       .image
         position absolute
         left 0
         top 0
         bottom 0
-        z-index 0
         display inline-block
-        width 374px
-        opacity 0.2
-        background-image url(../style/test.png)
-        background-size cover
+        width 350px
+        opacity 0.4
+        background-image url(../style/img1.png)
+        background-size 100% auto
+        background-position left -23px
+        background-repeat no-repeat
+        box-shadow -20px 0px 20px -10px boxBackground inset
 
     fold-corner '.box:not(.right)', 16px, boxBackground
 
-    .right.box
+    .box:not(.right)
+      animation slideRight enterDuration
+
+    .box.right
+      animation slideLeft enterDuration
       left auto
-      right 0
+      right -5px
       text-align left
       padding 18px 0 22px 20px
 
       .image
         left auto
         right 0
+        background-image url(../style/img2.png)
+        box-shadow 20px 0px 20px -10px boxBackground inset
+        background-position 0px -50px
     
     fold-corner '.right.box', 16px, boxBackground, true
+
+@keyframes slideLeft
+  0%
+    transform translateX(110%)
+  100%
+    transform translateX(0)
+    visibility visible
+
+@keyframes slideRight
+  0%
+    transform translateX(-110%)
+  100%
+    transform translateX(0)
+    visibility visible
 
 /***********************************************
  * Bootstrap widgets

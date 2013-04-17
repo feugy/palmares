@@ -26,15 +26,6 @@ module.exports = class Router extends EventEmitter
   # Palmares service: heart of the application
   service: null
 
-  # list of known routes and their corresponding method
-  routes: 
-    'home': ->
-      $('#main').empty().scrollTop(0).append new HomeView().$el
-    'couple': (name) ->
-      $('#main').empty().scrollTop(0).append new CoupleView(name).$el
-    'competition': (id) ->
-      $('#main').empty().scrollTop(0).append new CompetitionView(id).$el
-
   # Router constructor: initialize services and run home view.
   constructor: ->
     #set main window title
@@ -58,6 +49,7 @@ module.exports = class Router extends EventEmitter
       </ul>""")
       .on('click', '.settings', @_onSettings)
       .on 'click', '.about', @_onAbout
+    @constructor = true
     @navigate 'home'
 
   # Trigger a given route, passing relevant arguments
@@ -67,10 +59,18 @@ module.exports = class Router extends EventEmitter
   # @param args [Object] arbitrary arguments of the executed route. May be as many as needed
   # @throws if the desired path does not match any known routes
   navigate: (path, args...) =>
-    if path of @routes
-      method = @routes[path]
-      method = @[method] if _.isString method
-      method.apply @, args
+    if path in ['home', 'couple', 'competition']
+      view = (
+        switch path
+          when 'home' then new HomeView()
+          when 'couple' then new CoupleView args[0]
+          when 'competition' then new CompetitionView args[0]
+      )
+      $('#main').addClass 'leaving'
+      _.delay =>
+        @constructor = false
+        $('#main').removeClass('leaving').empty().scrollTop(0).append view.$el
+      , if @constructor then 0 else 500
     else 
       throw new Error "unknown route #{path}"
     @emit 'navigate', path: path

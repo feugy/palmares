@@ -1,17 +1,19 @@
 <h2 class="right box"><span class="text">{{competition.place}}</span><span class="date">{{date}}</span><span class="image"></span></h2>
-<a class="home btn btn-primary btn-large" href="#"><i class="icon-home"></i>{{i18n.buttons.home}}</a>
-{{^contests}}
-{{i18n.msgs.noContests}}
-{{/contests}}
-{{#contests}}
-<article>
-  <h3>{{title}}</h3>
-  <ul>
-    {{#results}}
-    <li {{#tracked}}data-name="{{name}}" class="tracked"{{/tracked}}>
-      <span class="rank">{{rank}}</span><span class="name">{{name}}</span>
-    </li>
-    {{/results}}
-  </ul>
-</article>
-{{/contests}}
+<div class="content">
+  <a class="home btn btn-primary btn-large" href="#"><i class="icon-home"></i>{{i18n.buttons.home}}</a>
+  {{^contests}}
+  {{i18n.msgs.noContests}}
+  {{/contests}}
+  {{#contests}}
+  <article>
+    <h3>{{title}}</h3>
+    <ul>
+      {{#results}}
+      <li {{#tracked}}data-name="{{name}}" class="tracked"{{/tracked}}>
+        <span class="rank">{{rank}}</span><span class="name">{{name}}</span>
+      </li>
+      {{/results}}
+    </ul>
+  </article>
+  {{/contests}}
+</div>
