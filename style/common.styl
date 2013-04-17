@@ -229,6 +229,49 @@ input:not([type=button]):not([type=submit]):focus
 .progress-striped .bar
   background-color warningColor
 
+.tracked .newly
+.details .tracked
+  color primaryColor
+
+  .rank
+    color primaryColor
+
+.couple:hover.newly:before
+  display none
+
+.tracked .newly:before
+.details .tracked:before
+  content ''
+  background-image url(glyphicons-halflings.png)
+  background-position -120px 0px
+  display inline-block
+  position relative
+  height size=14px
+  width size
+  line-height size
+  margin-left -(size+3)
+  left -4px
+  top 2px
+
+.tracked .newly:before
+  animation bounce 2s ease infinite
+
+@keyframes bounce
+  0% 
+    top 2px
+  20% 
+    top -3px
+  30% 
+    top 3px
+  35%
+    top -1px
+  40%
+    top 3px
+  50%
+    top 1px
+  60%
+    top 2px
+
 /***********************************************
  * Home view
  */
@@ -370,22 +413,6 @@ input:not([type=button]):not([type=submit]):focus
 
       .rank:after
         content '.'
-
-    li.tracked 
-      color primaryColor
-
-      .rank
-        color primaryColor
-
-      .name:after
-        content ''
-        background-image url(glyphicons-halflings.png)
-        background-position -120px -72px
-        display inline-block
-        margin 0 0 -2px 5px
-        height size=14px
-        line-height size
-        width size
 
     li.tracked
       cursor pointer

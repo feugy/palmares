@@ -17,10 +17,14 @@ module.exports = class HomeView extends View
   # i18n object for rendering
   i18n: require '../../nls/common.yml'
 
+  # couple names that have fresh results
+  newly: {}
+
   # event map
   events: 
     'click .track': '_onTrackPopup'
     'click .couple': '_onOpenCouple'
+    'click .result': '_onOpenCouple'
     'click .untrack': '_onUntrack'
     'click .refresh': '_onRefreshPopup'
     'click .competition': '_onOpenCompetition'
@@ -33,7 +37,7 @@ module.exports = class HomeView extends View
   # @return the built view
   constructor: () ->
     super className: 'home'
-    #@bindTo service, 'result', @_onResult
+    @bindTo service, 'result', @_onResult
     @render()
 
   # Extends superclass behaviour to cache often used nodes
@@ -62,6 +66,11 @@ module.exports = class HomeView extends View
         </li>
         """
     ).join ''
+
+    # re-display newly couples
+    @newly = {}
+    storage.pop 'newly', (err, values) =>
+      @_onResult couple:name for name of values
 
   # refresh only the list of competitions
   renderCompetitions: =>
@@ -215,7 +224,12 @@ module.exports = class HomeView extends View
     if $(event?.target).is ':checkbox'
       return @$('.untrack').toggleClass 'hidden', @$('.tracked :checked').length is 0
     event.preventDefault()
-    router.navigate 'couple', $(event.target).closest('li').data 'name'
+    name = $(event.target).closest('li').data 'name'
+    # update storage
+    if name of @newly
+      delete @newly[name]
+      storage.push 'newly', @newly
+    router.navigate 'couple', name
 
   # **private**
   # Navigate to the Competition details page.
@@ -229,17 +243,13 @@ module.exports = class HomeView extends View
     router.navigate 'competition', $(event.target).closest('li').data 'id'
 
   # Display new results while they are retrieved
+  # A special class is added to corresponding result
   #
   # @param ranking [Object] the new ranking, with the concerned couple name
-  # @param competition [Object] the concerned competition
-  _onResult: (ranking, competition) =>
-    panel = @$('.results-panel')
-    console.log "new result for #{ranking.couple} in #{competition.place}: #{ranking.rank}/#{ranking.total}"
-    # previous alert removal
-    clearTimeout @resultTimeout if @resultTimeout
-    panel.children().alert 'close'
-    panel.empty().append "<div class='alert alert-success fade in'>#{_.sprintf @i18n.msgs.newResult, ranking.couple, competition.place}</div>"
-    # auto closure
-    @resultTimeout = _.delay ->
-      panel.children().alert 'close'
-    , rankingDelay
+  _onResult: (ranking) =>
+    return if ranking.couple of @newly
+    # toggle class on rendering
+    @$(".couple[data-name='#{ranking.couple}']").addClass 'newly', true
+    # keep in storage
+    @newly[ranking.couple] = true
+    storage.push 'newly', @newly

@@ -312,31 +312,25 @@ describe 'Palmares service tests', ->
       expect(xlsx.worksheets).to.have.length 1
       sheet = xlsx.worksheets[0]
       expect(sheet).to.have.property 'name', i18n.globalSheet
-      expect(sheet.data).to.be.deep.equal [
-        ['', 'Bourg En Bresse', '19/01/2013']
-        []
-        ['', 'Couple', 'Résultat', 'Catégorie', 'Latines', 'Standards']
-        ['', couples[1], '4/9', 'Adultes E Latines', 'x', '']
-        ['', couples[0], '5/14', 'Juniors II E Latines', 'x', '']
-        []
-        ['', 'Bourg En Bresse', '02/03/2013']
-        []
-        ['', 'Couple', 'Résultat', 'Catégorie', 'Latines', 'Standards']
-        ['', couples[2], '3/18', 'Championnat de France Adultes A B C Standard', '', 'x']
-        []
-        ['', 'Bagnols-sur-cèze (30)', '30/03/2013']
-        []
-        ['', 'Couple', 'Résultat', 'Catégorie', 'Latines', 'Standards']
-        ['', couples[0], '5/28', 'Juniors II E Latines', 'x', '']
-        ['', couples[0], '30/70', 'Open Juvéniles I Juvéniles II Juniors I Juniors II C D E Latines', 'x', '']
-        []
-        ['', 'Bagnols-sur-cèze (30)', '31/03/2013']
-        []
-        ['', 'Couple', 'Résultat', 'Catégorie', 'Latines', 'Standards']
-        ['', couples[1], '4/7', 'Adultes E Standard', '', 'x']
-        ['', couples[0], '8/21', 'Juniors II E Latines', 'x', '']
-        []
-      ]
+      data = JSON.stringify sheet.data
+      expect(data).to.include 'Bourg En Bresse 19/01/2013'
+      expect(data).to.include 'Bourg En Bresse 02/03/2013'
+      expect(data).to.include 'Bagnols-sur-cèze (30) 30/03/2013'
+      expect(data).to.include 'Bagnols-sur-cèze (30) 31/03/2013'
+      expect(data).to.include couples[0]
+      expect(data).to.include couples[1]
+      expect(data).to.include couples[2]
+      expect(data).to.include '5/28'
+      expect(data).to.include '30/70'
+      expect(data).to.include '4/7'
+      expect(data).to.include '8/21'
+      expect(data).to.include '4/9'
+      expect(data).to.include '5/14'
+      expect(data).to.include 'Adultes E Latines'
+      expect(data).to.include 'Adultes E Standard'
+      expect(data).to.include 'Juniors II E Latines'
+      expect(data).to.include 'Open Juvéniles I Juvéniles II Juniors I Juniors II C D E Latines'
+      expect(data).to.include 'Championnat de France Adultes A B C Standard'
       done()
 
   it 'should existing couple palmares be returned', (done) ->

@@ -81,7 +81,7 @@ module.exports = class PalmaresService extends EventEmitter
     return callback new Error "couple #{couple} is not tracked" unless details?
     # enrich stored palmares with competitions data
     palmares = []
-    for id, results of details.palmares
+    for id, results of details.palmares when id of @competitions
       palmares.push 
         competition: @competitions[id]
         results: results
@@ -274,17 +274,36 @@ module.exports = class PalmaresService extends EventEmitter
     xlsx.worksheets.push sheet
 
     # list competition by date
+    bColor = "666666"
+    sheet.data.push ['']
     for competition in _.values(@competitions).sort((c1, c2) -> c1.date.unix() - c2.date.unix())
       # is their any related couples ?
       results = _.flatten (couple.palmares[competition.id] for couple in couples when competition.id of couple.palmares)
       if results.length
         results = _.sortBy results, 'contest'
-        sheet.data.push ['', competition.place, competition.date.format @i18n.dateFormat], [], ['', @i18n.couple, @i18n.result, @i18n.contest, @i18n.lat, @i18n.std]
-        for result in results
+        sheet.data.push ['', {colSpan: 5, hAlign:'center', value: "#{competition.place} #{competition.date.format @i18n.dateFormat}", fontSize: 15, bold:true}], []
+        sheet.data.push [
+          ''
+          {value: @i18n.couple, autoWidth: true, hAlign:'center', bold: true, borders: right:bColor, left: bColor, top:bColor, bottom: bColor}
+          {value: @i18n.result, autoWidth: true, hAlign:'center', bold: true, borders: right:bColor, top:bColor, bottom: bColor}
+          {value: @i18n.contest, autoWidth: true, hAlign:'center', bold: true, borders: right:bColor, top:bColor, bottom: bColor}
+          {value: @i18n.lat, autoWidth: true, hAlign:'center', bold: true, borders: right:bColor, top:bColor, bottom: bColor}
+          {value: @i18n.std, autoWidth: true, hAlign:'center', bold: true, borders: right:bColor, top:bColor, bottom: bColor}
+        ]
+        for result, i in results
           [lat, std] = ['', 'x']
           [lat, std] = ['x', ''] if result.kind is 'lat'
-          sheet.data.push ['', result.couple, "#{result.rank}/#{result.total}", result.contest, lat, std]
-        sheet.data.push []
+          borders = right:bColor
+          borders.bottom = bColor if i is results.length-1
+          sheet.data.push [
+            {value: '', borders: right:bColor}
+            {value:result.couple, hAlign: 'center', borders: borders}
+            {value:"#{result.rank}/#{result.total}", hAlign: 'center', borders: borders}
+            {value:result.contest, hAlign: 'center', borders: borders}
+            {value:lat, hAlign: 'center', borders: borders}
+            {value:std, hAlign: 'center', borders: borders}
+          ]
+        sheet.data.push ['']
 
     callback null, xlsx
 

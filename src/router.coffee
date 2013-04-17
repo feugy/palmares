@@ -45,7 +45,8 @@ module.exports = class Router extends EventEmitter
       new FFDS util.confKey 'providers.FFDS'
       new WDSF util.confKey 'providers.WDSF'
     ]
-    @service = new PalmaresService new Storage(), @providers, _.extend {appTitle: @i18n.titles.application}, @i18n.export
+    global.storage = new Storage()
+    @service = new PalmaresService storage, @providers, _.extend {appTitle: @i18n.titles.application}, @i18n.export
     global.service = @service
     global.searchProvider = @providers[0]
     # add configuration and credits view

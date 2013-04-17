@@ -57,7 +57,6 @@ msgs:
     <div class="%1$s">Analyse de <em>%2$s %3$s</em>: concours <span class="done">0</span>/<span class="total"></span>...</div>
   competitionAnalyzed: >
     <div>Compétition de <em>%1$s %2$s</em> analysée</div>
-  newResult: Nouveau résultat de %1$s à %2$s !
   validCouple: le nom semble bon !
   foundInGroup: '%1$s couple(s) trouvé(s) !'
   searchInProgress: 'consultation en cours...'

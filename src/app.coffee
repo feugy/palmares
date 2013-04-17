@@ -1,6 +1,8 @@
 'use strict'
 
 gui = require 'nw.gui'
+fs = require 'fs-extra'
+moment = require 'moment'
 
 # register window globals inside NodeJS's global space
 global.gui = gui
@@ -22,6 +24,8 @@ win.on 'close', ->
 # Display on dev tools the caught error and do not crash
 process.on 'uncaughtException', (err) ->
   console.error err.stack
+  fs.appendFileSync 'error.txt', "------\n#{moment().format 'DD/MM/YYYY HH:mm:ss'}\n#{err.stack}\n"
+  process.exit() unless global.router?
 
 # DOM is ready
 win.on 'loaded', ->
