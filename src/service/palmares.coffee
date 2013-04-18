@@ -183,9 +183,10 @@ module.exports = class PalmaresService extends EventEmitter
         ids = _.difference _.pluck(competitions, 'id'), existing
         return next() unless ids.length
         # analyse the remaining competitions
-        newCompetitions = _.filter(competitions, (c) -> c.id in ids)
-        @emit 'progress', 'compRetrieved', name: provider.opts.name, num: newCompetitions.length
-        async.eachLimit newCompetitions, @limit, (competition, next2) =>
+        competitions = _.filter(competitions, (c) -> c.id in ids)
+        newCompetitions = newCompetitions.concat competitions
+        @emit 'progress', 'compRetrieved', name: provider.opts.name, num: competitions.length
+        async.eachLimit competitions, @limit, (competition, next2) =>
           # get details
           @emit 'progress', 'compStart', competition
           provider.getDetails competition, (err) =>

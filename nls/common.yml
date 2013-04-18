@@ -31,7 +31,7 @@ msgs:
   noTracked: >
     <p>Actuellement, aucun couple suivi.</p>
     <p>Ajoutez des couples a suivre: leur palmarès de l'année sera établi et automatiquement mis à jour.</p>
-  noCompetition: >
+  noCompetitions: >
     <p>Aucune compétition analysée pour l'instant.<p>
     <p>Sur la page d'accueil, utilisez le bouton de mise à jour, ou ajouter des couples à suivre.</p>
   chooseCouple: >

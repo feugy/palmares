@@ -9,6 +9,17 @@ global.gui = gui
 global.$ = $
 # first require: use path relative to index.html
 Router = require './lib/router.js'
+_ = require 'underscore'
+
+splash = gui.Window.open 'template/splash.html', 
+  position: 'center'
+  toolbar: false
+  resizable: false
+  frame: false
+  show: true
+  'always-on-top': true
+  height: 200
+  width: 400
 
 # 'win' is Node-Webkit's window
 # 'window' is DOM's window
@@ -44,8 +55,13 @@ win.on 'loaded', ->
     height = Number localStorage.getItem 'height'
     win.resizeTo width, height
 
-  # start main application
-  global.router = new Router()
-
   # we are ready: shows it !
   win.show()
+
+  # start main application, after window is shown
+  _.delay ->
+    global.router = new Router()
+    _.delay ->
+      splash.close true
+    , 50
+  , 100

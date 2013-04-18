@@ -55,8 +55,7 @@ module.exports = class HomeView extends View
     list = @$('.tracked .list')
     # hide optionnal empty message, and displays it if necessary
     @$('.no-tracked').remove()
-    unless tracked.length
-      return $("<p class='no-tracked'>#{@i18n.msgs.noTracked}</p>").insertAfter list.empty() 
+    return $("<div class='no-tracked'>#{@i18n.msgs.noTracked}</div>").insertAfter list.empty() unless tracked.length
     list.empty().append (
       for couple in tracked
         """
@@ -80,8 +79,7 @@ module.exports = class HomeView extends View
     list = @$('.competitions .list')
     # hide optionnal empty message, and displays it if necessary
     @$('.no-competitions').remove()
-    unless competitions.length
-      return $("<p class='no-competitions'>#{@i18n.msgs.noCompetitions}</p>").insertAfter list.empty()
+    return $("<div class='no-competitions'>#{@i18n.msgs.noCompetitions}</div>").insertAfter list.empty() unless competitions.length
     list.empty().append (
       for competition in competitions
         """
