@@ -38,6 +38,7 @@
     "node": "0.10.2"
   },
   "window": {
+    "icon": "style/ribas-icon.png",
     "toolbar": false,
     "show": false,
     "min_width": 900,

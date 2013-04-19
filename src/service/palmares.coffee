@@ -52,6 +52,7 @@ module.exports = class PalmaresService extends EventEmitter
   limit: 3
 
   # Build a new service instance from a given storage service
+  # Triggers a `ready` event when fully initialized
   #
   # @param storage [Object] a Storage service instance.
   # @param providers [Array] array of providers used to get competitions. 
@@ -61,9 +62,10 @@ module.exports = class PalmaresService extends EventEmitter
     @storage.pop 'tracked', (err, value) =>
       console.error "failed to restore tracked couples: #{err}" if err?
       @tracked = value or []
-    @storage.pop 'competitions', (err, value) =>
-      console.error "failed to restore competitions: #{err}" if err?
-      @competitions = value or {}
+      @storage.pop 'competitions', (err, value) =>
+        console.error "failed to restore competitions: #{err}" if err?
+        @competitions = value or {}
+        @emit 'ready'
     # relay providers events 
     for provider in @providers
       provider.on 'progress', (args...) => @emit.apply @, ['progress'].concat args

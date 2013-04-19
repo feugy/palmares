@@ -5,7 +5,7 @@ EventEmitter = require('events').EventEmitter
 util = require './util/common'
 FFDS = require './provider/ffds'
 WDSF = require './provider/wdsf'
-Storage = require './service/localstorage'
+Storage = require './service/indexeddb'
 PalmaresService = require './service/palmares'
 HomeView = require './view/home'
 CoupleView = require './view/couple'
@@ -40,17 +40,19 @@ module.exports = class Router extends EventEmitter
     @service = new PalmaresService storage, @providers, _.extend {appTitle: @i18n.titles.application}, @i18n.export
     global.service = @service
     global.searchProvider = @providers[0]
-    # add configuration and credits view
-    $('.parameters').addClass('btn-group').html("""
-      <a class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-cog"></i><span class="caret"></span></a>
-      <ul class="dropdown-menu">
-        <li class="settings">#{@i18n.buttons.settings}</li>
-        <li class="about"  >#{@i18n.buttons.about}</li>
-      </ul>""")
-      .on('click', '.settings', @_onSettings)
-      .on 'click', '.about', @_onAbout
-    @constructor = true
-    @navigate 'home'
+    
+    @service.on 'ready', =>
+      # add configuration and credits view
+      $('.parameters').addClass('btn-group').html("""
+        <a class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-cog"></i><span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          <li class="settings">#{@i18n.buttons.settings}</li>
+          <li class="about"  >#{@i18n.buttons.about}</li>
+        </ul>""")
+        .on('click', '.settings', @_onSettings)
+        .on 'click', '.about', @_onAbout
+      @constructor = true
+      @navigate 'home'
 
   # Trigger a given route, passing relevant arguments
   # Emit also a `navigate` event with executed route, after the route is executed
