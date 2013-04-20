@@ -54,6 +54,9 @@ win.on 'loaded', ->
     width = Number localStorage.getItem 'width'
     height = Number localStorage.getItem 'height'
     win.resizeTo width, height
+  else
+    infos = require './package.json'
+    win.resizeTo infos.window.min_width, infos.window.min_height,
 
   # we are ready: shows it !
   win.show()

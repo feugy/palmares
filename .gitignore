@@ -1,4 +1,5 @@
 bin
 lib
+installer/Palmares-installer.exe
 node_modules
 error.txt
