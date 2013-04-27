@@ -258,10 +258,19 @@ module.exports = class PalmaresService extends EventEmitter
   # Export global palmares to XlsX.js compliant format.
   # Each competition is summarized with all related couples and their rankings
   #
+  # @param compIds [Array]. Optionnal array of competition ids to be exported. If not specified (or null), all competitions are exported.
   # @param callback [Function] end callback. Invoked with arguments:
   # @option callback error [Error] an Error object, or null if no error occured
   # @option callback xlsx [Array] XlsX.js compliant content, with global palmares
-  export: (callback) =>
+  export: (compIds, callback) =>
+    [callback, compIds] = [compIds, null] if _.isFunction compIds
+    # select relevant competitions and sort them by date (newest at last)
+    if compIds?
+      competitions = _.unique (@competitions[id] for id in compIds)
+    else
+      competitions = _.values @competitions
+    competitions.sort((c1, c2) -> c1.date.unix() - c2.date.unix()) 
+
     # takes all tracked details
     couples = @tracked
 
@@ -279,7 +288,7 @@ module.exports = class PalmaresService extends EventEmitter
     # list competition by date
     bColor = "666666"
     sheet.data.push ['']
-    for competition in _.values(@competitions).sort((c1, c2) -> c1.date.unix() - c2.date.unix())
+    for competition in competitions
       # is their any related couples ?
       results = _.flatten (couple.palmares[competition.id] for couple in couples when competition.id of couple.palmares)
       if results.length

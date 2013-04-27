@@ -45,6 +45,7 @@ module.exports = class HomeView extends View
     super()
     @renderTracked()
     @renderCompetitions()
+    @$('.bar .export').tooltip html: true, title: @i18n.tips.exportAll, delay: 750
     @
 
   # refresh only the list of tracked couples
@@ -61,7 +62,7 @@ module.exports = class HomeView extends View
         """
         <li class="couple" data-name="#{couple.name}">
           <span class="name">#{couple.name}</span>
-          <input type="checkbox" class="pull-right">
+          <a class="untrack btn btn-warning pull-right" href="#"><i class="icon-trash"></i></a>
         </li>
         """
     ).join ''
@@ -70,6 +71,7 @@ module.exports = class HomeView extends View
     @newly = {}
     storage.pop 'newly', (err, values) =>
       @_onResult couple:name for name of values
+    @$('.untrack').tooltip html: true, title: @i18n.tips.untrack, delay: 750
 
   # refresh only the list of competitions
   renderCompetitions: =>
@@ -86,20 +88,30 @@ module.exports = class HomeView extends View
         <li class="competition" data-id="#{competition.id}">
           <span class="date">#{competition.date.format @i18n.dateFormat}</span>
           <span class="name">#{competition.place}</span> 
-          <input type="checkbox" class="pull-right">
+          <span class="pull-right">
+            <a class="export btn" href="#"><i class="icon-download"></i></a>
+            <a class="remove btn btn-warning" href="#"><i class="icon-trash"></i></a>
+          </span>
         </li>
         """
     ).join ''
+    @$('.remove').tooltip html: true, title: @i18n.tips.remove, delay: 750
+    @$('li .export').tooltip html: true, title: @i18n.tips.export, delay: 750
 
   # **private**
   # Exports global palmares to xlsx format
   _onExport: (event) =>
     event?.preventDefault()
+    # to avoid opening the couple
+    event?.stopImmediatePropagation()
+    # get exported competition if specified
+    id = $(event?.target).closest('li.competition').data 'id' 
+    name = $(event?.target).closest('li.competition').find('.name').text() or @i18n.titles.application
     # get xlsx content
-    service.export (err, result) =>
+    service.export (if id? then [id] else null), (err, result) =>
       return util.popup @i18n.titles.exportError, _.sprintf @i18n.errors.export, err.message if err?
       # display a file selection dialog
-      fileDialog = $("<input style='display:none' type='file' accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' nwsaveas>").trigger 'click'
+      fileDialog = $("<input style='display:none' type='file' value='#{name}.xlsx' nwsaveas accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'>").trigger 'click'
       fileDialog.on 'change', =>
         file = fileDialog[0].files?[0]?.path
         console.log fileDialog[0].files?[0]
@@ -175,17 +187,18 @@ module.exports = class HomeView extends View
   # @param event [Event] cancelled click event
   _onUntrack: (event) =>
     event.preventDefault()
-    # select all checked couples
-    selected = ($(selected).closest('li').data 'name' for selected in @$ '.tracked :checked')
-    return unless selected.length > 0
+    # to avoid opening the couple
+    event.stopImmediatePropagation()
+    # get couple's name
+    name = $(event.target).closest('li.couple').data 'name'
     # display a confirmation popup
-    util.popup @i18n.titles.confirm, _.sprintf(@i18n.msgs.untrack, selected.join('<br>')), [
+    util.popup @i18n.titles.confirm, _.sprintf(@i18n.msgs.untrack, name), [
       text: @i18n.buttons.no
     ,
       text: @i18n.buttons.yes
       className: 'btn-warning'
       click: =>
-        service.untrack selected, @renderTracked
+        service.untrack [name], @renderTracked
     ]
 
   # **private**
@@ -194,23 +207,19 @@ module.exports = class HomeView extends View
   # @param event [Event] cancelled click event
   _onRemove: (event) =>
     event.preventDefault()
-     # select all checked competitions
-    ids = []
-    names = []
-    for selected in @$ '.competitions :checked'
-      competition = $(selected).closest 'li'
-      names.push competition.find('.name').text()
-      ids.push competition.data 'id'
-
-    return unless ids.length > 0
+    # to avoid opening the competition
+    event.stopImmediatePropagation()
+    # get competition's id and name
+    name = $(event.target).closest('li.competition').find('.name').text()
+    id = $(event.target).closest('li.competition').data 'id'
     # display a confirmation popup
-    util.popup @i18n.titles.confirm, _.sprintf(@i18n.msgs.remove, names.join('<br>')), [
+    util.popup @i18n.titles.confirm, _.sprintf(@i18n.msgs.remove, name), [
       text: @i18n.buttons.no
     ,
       text: @i18n.buttons.yes
       className: 'btn-warning'
       click: =>
-        service.remove ids, @renderCompetitions
+        service.remove [id], @renderCompetitions
     ]
 
   # **private**

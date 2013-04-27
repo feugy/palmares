@@ -312,7 +312,7 @@ describe 'Palmares service tests', ->
       expect(xlsx.worksheets).to.have.length 1
       sheet = xlsx.worksheets[0]
       expect(sheet).to.have.property 'name', i18n.globalSheet
-      data = JSON.stringify sheet.data
+      data = JSON.stringify sheet.data, null, 2
       expect(data).to.include 'Bourg En Bresse 19/01/2013'
       expect(data).to.include 'Bourg En Bresse 02/03/2013'
       expect(data).to.include 'Bagnols-sur-cèze (30) 30/03/2013'
@@ -326,11 +326,43 @@ describe 'Palmares service tests', ->
       expect(data).to.include '8/21'
       expect(data).to.include '4/9'
       expect(data).to.include '5/14'
+      expect(data).to.include '3/18'
       expect(data).to.include 'Adultes E Latines'
       expect(data).to.include 'Adultes E Standard'
       expect(data).to.include 'Juniors II E Latines'
       expect(data).to.include 'Open Juvéniles I Juvéniles II Juniors I Juniors II C D E Latines'
       expect(data).to.include 'Championnat de France Adultes A B C Standard'
+      done()
+
+  it 'should some competitions palmares be exported', (done) ->
+    service.export ['a281637604e1ac8ffd1eeb51e58e7adf', 'e3a7748ff934c9020e76fd9748220192'], (err, xlsx) ->
+      return done "failed to export competitions palmares: #{err}" if err?
+      expect(xlsx).to.have.property 'creator', i18n.appTitle
+      expect(xlsx).to.have.property 'lastModifiedBy', i18n.appTitle
+      expect(xlsx).to.have.property 'worksheets'
+      expect(xlsx.worksheets).to.have.length 1
+      sheet = xlsx.worksheets[0]
+      expect(sheet).to.have.property 'name', i18n.globalSheet
+      data = JSON.stringify sheet.data, null, 2
+      expect(data).to.include 'Bourg En Bresse 19/01/2013'
+      expect(data).not.to.include 'Bourg En Bresse 02/03/2013'
+      expect(data).to.include 'Bagnols-sur-cèze (30) 30/03/2013'
+      expect(data).not.to.include 'Bagnols-sur-cèze (30) 31/03/2013'
+      expect(data).to.include couples[0]
+      expect(data).to.include couples[1]
+      expect(data).not.to.include couples[2]
+      expect(data).to.include '5/28'
+      expect(data).to.include '30/70'
+      expect(data).not.to.include '4/7'
+      expect(data).not.to.include '8/21'
+      expect(data).to.include '4/9'
+      expect(data).to.include '5/14'
+      expect(data).not.to.include '3/18'
+      expect(data).to.include 'Adultes E Latines'
+      expect(data).not.to.include 'Adultes E Standard'
+      expect(data).to.include 'Juniors II E Latines'
+      expect(data).to.include 'Open Juvéniles I Juvéniles II Juniors I Juniors II C D E Latines'
+      expect(data).not.to.include 'Championnat de France Adultes A B C Standard'
       done()
 
   it 'should existing couple palmares be returned', (done) ->

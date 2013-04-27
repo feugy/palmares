@@ -30,6 +30,7 @@ section
   ; define the output path files
   setOutPath $INSTDIR
   file ..\package.json
+  file ..\README.md
   file ..\index.html
   file /r ..\bin
   file /r ..\conf
@@ -70,6 +71,7 @@ section "Uninstall"
   ; Always delete uninstaller first
   delete $INSTDIR\uninstall.exe
   delete $INSTDIR\package.json
+  delete $INSTDIR\README.md
   delete $INSTDIR\index.html
   rmdir /r $INSTDIR\bin
   rmdir /r $INSTDIR\conf

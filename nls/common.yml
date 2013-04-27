@@ -80,6 +80,12 @@ errors:
   noContests: >
     <div class="alert alert-warning">Cette compétition ne contient aucun résultat</div>
 
+tips:
+  exportAll: Export tous les résultats des couples suivis
+  export: Exporte les résultats des couples suivis pour cette competition
+  remove: Supprime cette compétition de la liste
+  untrack: Arréter de suivre ce couple
+
 export:
   globalSheet: Par compétition
   dateFormat: DD/MM/YYYY

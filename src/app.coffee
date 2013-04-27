@@ -10,6 +10,7 @@ global.$ = $
 # first require: use path relative to index.html
 Router = require './lib/router.js'
 _ = require 'underscore'
+isMaximized = false
 
 splash = gui.Window.open 'template/splash.html', 
   position: 'center'
@@ -30,7 +31,13 @@ win.on 'close', ->
   console.log 'close !'
   for attr in ['x', 'y', 'width', 'height']
     localStorage.setItem attr, win[attr]
+
+  localStorage.setItem 'maximized', isMaximized
   @close true
+
+win.on 'maximize', -> isMaximized = true; console.log '>> max'
+win.on 'unmaximize', -> isMaximized = false; console.log '<< unmax'
+win.on 'minimize', -> isMaximized = false; console.log '<< unmax'
 
 # Display on dev tools the caught error and do not crash
 process.on 'uncaughtException', (err) ->
@@ -60,6 +67,8 @@ win.on 'loaded', ->
 
   # we are ready: shows it !
   win.show()
+  # local storage stores strings !
+  win.maximize() if 'true' is localStorage.getItem 'maximized'
 
   # start main application, after window is shown
   _.delay ->
