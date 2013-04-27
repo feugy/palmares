@@ -35,9 +35,9 @@ win.on 'close', ->
   localStorage.setItem 'maximized', isMaximized
   @close true
 
-win.on 'maximize', -> isMaximized = true; console.log '>> max'
-win.on 'unmaximize', -> isMaximized = false; console.log '<< unmax'
-win.on 'minimize', -> isMaximized = false; console.log '<< unmax'
+win.on 'maximize', -> isMaximized = true
+win.on 'unmaximize', -> isMaximized = false
+win.on 'minimize', -> isMaximized = false
 
 # Display on dev tools the caught error and do not crash
 process.on 'uncaughtException', (err) ->
