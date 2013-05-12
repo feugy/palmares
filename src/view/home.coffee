@@ -9,6 +9,25 @@ util = require '../util/ui'
 TrackingView = require './tracking'
 ProgressView = require './progress'
 
+# indicates wether a competition is displayable
+#
+# @param competition [Competition] tested competition
+# @param filter [String] current filter
+# @return true if competition can be displayed, false otherwise
+isDisplayed = (competition, filter) ->
+  return true if filter is 'none'
+  if filter is 'national'
+    return competition?.provider is 'ffds'
+  if filter is 'international'
+    return competition?.provider is 'wdsf'
+  if filter is 'couples'
+    # search for at least one couple present in on e of its contest results
+    for contest in competition?.contests
+      return true for couple in service.tracked when couple.name of contest.results
+    return false
+  # displayable by default
+  true
+
 module.exports = class HomeView extends View
 
   # template used to render view
@@ -20,6 +39,9 @@ module.exports = class HomeView extends View
   # couple names that have fresh results
   newly: {}
 
+  # competition filter
+  filter: null
+
   # event map
   events: 
     'click .track': '_onTrackPopup'
@@ -30,6 +52,7 @@ module.exports = class HomeView extends View
     'click .competition': '_onOpenCompetition'
     'click .remove': '_onRemove'
     'click .export': '_onExport'
+    'click .filter .dropdown-menu li': '_onFilter'
 
   # Home View constructor
   # Immediately renders the view
@@ -38,7 +61,11 @@ module.exports = class HomeView extends View
   constructor: () ->
     super className: 'home'
     @bindTo service, 'result', @_onResult
-    @render()
+    # read filter in local storage
+    storage.pop 'home-filter', (err, filter) =>
+      console.error err if err?
+      @filter = filter or 'none'
+      @render()
 
   # Extends superclass behaviour to cache often used nodes
   render: =>
@@ -46,6 +73,7 @@ module.exports = class HomeView extends View
     @renderTracked()
     @renderCompetitions()
     @$('.bar .export').tooltip html: true, title: @i18n.tips.exportAll, delay: 750
+    @$('.bar .filter').tooltip html: true, title: @i18n.tips.filter, delay: 750
     @
 
   # refresh only the list of tracked couples
@@ -79,11 +107,15 @@ module.exports = class HomeView extends View
     # hide removal button
     @$('.remove').toggleClass 'hidden', true
     list = @$('.competitions .list')
+    # indicates whether a filter is active or not
+    @$('.filter .btn').toggleClass 'enabled', @filter isnt 'none'
+    @$('.filter .dropdown-menu li').removeClass 'enabled'
+    @$(".filter .dropdown-menu li[data-filter = #{@filter}]").addClass 'enabled'
     # hide optionnal empty message, and displays it if necessary
     @$('.no-competitions').remove()
     return $("<div class='no-competitions'>#{@i18n.msgs.noCompetitions}</div>").insertAfter list.empty() unless competitions.length
     list.empty().append (
-      for competition in competitions
+      for competition in competitions when isDisplayed competition, @filter
         """
         <li class="competition" data-id="#{competition.id}">
           <span class="date">#{competition.date.format @i18n.dateFormat}</span>
@@ -95,6 +127,8 @@ module.exports = class HomeView extends View
         </li>
         """
     ).join ''
+    # warning for too restrictive filter
+    list.after "<div class='no-competitions'>#{@i18n.msgs.restrictiveFilter}</div>" if list.children().length is 0
     @$('.remove').tooltip html: true, title: @i18n.tips.remove, delay: 750
     @$('li .export').tooltip html: true, title: @i18n.tips.export, delay: 750
 
@@ -249,6 +283,7 @@ module.exports = class HomeView extends View
     event.preventDefault()
     router.navigate 'competition', $(event.target).closest('li').data 'id'
 
+  # **private**
   # Display new results while they are retrieved
   # A special class is added to corresponding result
   #
@@ -260,3 +295,15 @@ module.exports = class HomeView extends View
     # keep in storage
     @newly[ranking.couple] = true
     storage.push 'newly', @newly
+
+  # **private**
+  # Filter displayed competitions.
+  #
+  # @param event [Event] cancelled click event
+  _onFilter: (event) =>
+    event.preventDefault()
+    @filter = $(event.target).closest('li').attr('data-filter') or 'none'
+    # store in storage
+    storage.push 'home-filter', @filter, (err) =>
+      console.error err if err?
+      @renderCompetitions()

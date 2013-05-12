@@ -75,7 +75,7 @@ module.exports = class IndexedDB extends Storage
     # opens databse before if needed
     @_runOrOpen =>
       return callback new Error "no key provided" unless _.isString key
-      return callback new Error "no value provided" unless _.isObject obj
+      return callback new Error "no value provided" unless obj?
       # opens a read-write transaction
       tx = @db.transaction [storeName], 'readwrite'
       

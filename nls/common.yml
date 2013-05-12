@@ -25,6 +25,10 @@ buttons:
 
 labels:
   proxy: "Proxy :"
+  noFilter: Tout
+  filterNational: Compétitions nationnales
+  filterInternational: Compétitions internationnales
+  filterCouples: Compétitions des couples
 
 msgs:
   loading: chargement en cours...
@@ -34,6 +38,9 @@ msgs:
   noCompetitions: >
     <p>Aucune compétition analysée pour l'instant.<p>
     <p>Sur la page d'accueil, utilisez le bouton de mise à jour, ou ajouter des couples à suivre.</p>
+  restrictiveFilter: >
+    <p>Aucune compétition ne correspond à ce filtre.</p>
+    <p>Veuillez choisir un autre filtre, ou utiliser le bouton de mise à jour.</p>
   chooseCouple: >
     <p>Choisissez le nom d'un couple : prénom et nom du cavalier, '-', prénom et nom de la cavalière.</p>
     <p>Par exemple:</p>
@@ -85,6 +92,7 @@ tips:
   export: Exporte les résultats des couples suivis pour cette competition
   remove: Supprime cette compétition de la liste
   untrack: Arréter de suivre ce couple
+  filter: Masque ou montres certaines compétitions
 
 export:
   globalSheet: Par compétition

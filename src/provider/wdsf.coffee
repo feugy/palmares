@@ -79,6 +79,7 @@ module.exports = class WDSFProvider extends Provider
       place: _.titleize "#{record[2].trim()} #{record[1].replace('WDSF', '')?.trim()}".toLowerCase()
       date: moment record[0], @opts.dateFormat
       url: record[8][0...record[8].lastIndexOf '/']
+      provider: 'wdsf'
     # id is url, because date+place is not unique.
     data.id = md5 data.url
 

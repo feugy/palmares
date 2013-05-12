@@ -47,6 +47,7 @@ process.on 'uncaughtException', (err) ->
 
 # DOM is ready
 win.on 'loaded', ->
+  global.console = window.console
 
   # opens dev tools on F12 or Command+Option+J
   $(window).on 'keyup', (event) ->

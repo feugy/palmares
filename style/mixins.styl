@@ -110,8 +110,15 @@ button(selector, bgColor, iconWhite = false)
     background-color bgColor
     border-color bgColor bgColor lighten(bgColor, 50%)
     if iconWhite
+
+      color white
+
+      .caret
+        border-top-color white
+        
       i
         background-image url(glyphicons-halflings-white.png)
+
 
   {selector}:focus, {selector}:hover, {selector}:active, {selector}:active, {selector}.disabled, {selector}[disabled]
     background-color bgColor

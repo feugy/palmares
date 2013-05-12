@@ -39,6 +39,10 @@ To build the windows installer, download [NSIS](http://nsis.sourceforge.net/Main
 
 # Release notes
 
+v1.2.0
+
+  - add filtering buttons on competition list
+
 v1.1.0
 
   - restore maximized window state between executions

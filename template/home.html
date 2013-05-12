@@ -10,7 +10,16 @@
   <div class="competitions span6">
     <h2 class="right box"><span class="text">{{i18n.titles.competitions}}</span><span class="image"></span></h2>
     <div class="bar">
-      <a class="refresh btn btn-large " href="#"><i class="icon-refresh"></i>{{i18n.buttons.refresh}}</a>
+      <a class="refresh btn btn-large" href="#"><i class="icon-refresh"></i>{{i18n.buttons.refresh}}</a>
+      <div class="filter btn-group pull-right">
+        <a class="btn btn-small dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-eye-open"></i><span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          <li data-filter="couples"><span>{{i18n.labels.filterCouples}}</span></li>
+          <li data-filter="national"><span>{{i18n.labels.filterNational}}</span></li>
+          <li data-filter="international"><span>{{i18n.labels.filterInternational}}</span></li>
+          <li><span>{{i18n.labels.noFilter}}</span></li>
+        </ul>
+      </div>
     </div>
     <ul class="list"></ul>
   </div>

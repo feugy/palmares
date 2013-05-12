@@ -33,7 +33,7 @@ module.exports =
     popup = $(html)
     popup.find('.modal-body').append message
 
-    popup.modal().on('hide', (event) -> 
+    popup.modal(backdrop:'static').on('hide', (event) -> 
       return if popup.preventClose
       # invoke close button if not prevented
       # close can be aborted if event is cancelled

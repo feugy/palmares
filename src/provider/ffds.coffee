@@ -60,7 +60,6 @@ cleanNames = (names) ->
 cleanContest = (original) ->
   original.replace('Compétition à points', '').replace('Compétition sans points', '').trim()
 
-
 # Extract national competitions from the Ballroom Dancing National Federation
 module.exports = class FFDSProvider extends Provider
 
@@ -227,6 +226,7 @@ module.exports = class FFDSProvider extends Provider
       place: _.titleize line.find('td').eq(0).text().trim().toLowerCase()
       date: moment line.find('td').eq(1).text(), @opts.dateFormat
       url: _.sprintf "#{@opts.url}/#{@opts.details}", id
+      provider: 'ffds'
     # id is date append to place lowercased without non-word characters.
     data.id = md5 "#{_.slugify data.place}#{data.date.format 'YYYYMMDD'}"
     new Competition data
