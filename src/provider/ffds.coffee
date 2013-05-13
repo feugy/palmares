@@ -93,7 +93,7 @@ module.exports = class FFDSProvider extends Provider
         err = new Error "failed to fetch results from '#{@opts.name}': #{res.statusCode}\n#{body}"
       return callback err if err?
       # extract competiton headers for each lines
-      $ = cheerio.load body.toString()
+      $ = cheerio.load util.replaceUnallowed body.toString()
       competitions = []
       for line in $ 'table#tosort > tbody > tr'
         competition = @_extractHeader $(line)
@@ -115,7 +115,7 @@ module.exports = class FFDSProvider extends Provider
       return callback err if err?
 
       # extract contests ranking ids
-      $ = cheerio.load body.toString()
+      $ = cheerio.load util.replaceUnallowed body.toString()
       urls = ("#{@opts.url}/#{$(link).attr 'href'}" for link in $ 'td > a')
       competition.contests = []
       # no contests yet
@@ -149,7 +149,7 @@ module.exports = class FFDSProvider extends Provider
         err = new Error "failed to fetch club list from '#{@opts.name}': #{res.statusCode}\n#{body}"
       return callback err if err?
       # extract club ids and names and store it in memory
-      $ = cheerio.load body.toString()
+      $ = cheerio.load util.replaceUnallowed body.toString()
       @clubs = (id: $(club).attr('value'), name: $(club).text().trim() for club in $ '[name=club_id] option')
       search()
 
@@ -201,7 +201,7 @@ module.exports = class FFDSProvider extends Provider
   # @options callback couples [array] list of strings containing the couple names (may be empty). 
   _extractNames: (body, callback) =>
     couples = []
-    $ = cheerio.load body.toString()
+    $ = cheerio.load util.replaceUnallowed body.toString()
     for couple in $ '#tosort tr'
       couple = $(couple)
       # ignore inactive couples
@@ -251,7 +251,7 @@ module.exports = class FFDSProvider extends Provider
         err = new Error  new Error "failed to fetch contest ranking from '#{@opts.name} #{competition.place}': #{res.statusCode}\n#{body}"
       return callback new Error "error on contest #{url}: #{err}" if err?
 
-      body = body.toString()
+      body = util.replaceUnallowed body.toString()
       # remove errored divs 
       body = body.replace /<\/div><\/th>/g, '</th>'
       # extract ranking

@@ -117,34 +117,80 @@ emitter.removeAccents = (str) ->
   str = str.toLowerCase().trim()
   (for char, i in str
     code = str.charCodeAt i
-    # 224~230: àáâãäåæ
-    if 224 <= code <= 230
+    # 224~230: àáâãäåæ, 257: ā, 259: ă, 261: ą
+    if 224 <= code <= 230 or code in [257, 259, 261]
       char = 'a'
-    # 231: ç
-    else if 231 is code
+    # 231: ç, 263: ć, 265: ĉ, 267: ċ, 269: č,
+    else if code in [231, 263, 265, 267]
       char = 'c'
-    # 232~235: èéêë
-    else if 232 <= code <= 235
-      char = 'e'
-    # 236~239: ìíîï
-    else if 236 <= code <= 239
-      char = 'i'
-    # 240: ð
-    else if 240 is code
+    # 240: ð, 271: ď, 273: đ
+    else if code in [240, 271, 273]
       char = 'd'
-    # 241: ñ
-    else if 241 is code
+    # 232~235: èéêë, 275: ē, 277: ĕ, 279: ė, 281: ę, 283: ě 
+    else if 232 <= code <= 235 or code in [275, 277, 279, 281, 283]
+      char = 'e'
+    # 285: ĝ, 287: ğ, 289: ġ, 291: ģ
+    else if code in [285, 287, 289, 291]
+      char = 'g'
+    # 293: ĥ, 295: ħ
+    else if code in [293, 295]
+      char = 'h'
+    # 236~239: ìíîï, 297: ĩ, 299: ī, 301: ĭ, 303: į, 305: ı
+    else if 236 <= code <= 239 or code in [297, 301, 303, 305]
+      char = 'i'
+    # 307: ĳ, 309: ĵ
+    else if code in [307, 309]
+      char = 'j'
+    # 311: ķ, 312: ĸ
+    else if code in [311, 312]
+      char = 'k'
+    # 314: ĺ, 316: ļ, 318: ľ, 320: ŀ, 322: ł 
+    else if code in [314, 316, 318, 320, 322]
+      char = 'l'
+    # 241: ñ, 324: ń, 326: ņ, 328: ň, 329: ŉ, 331: ŋ
+    else if code in [241, 324, 326, 328, 329, 331]
       char = 'n'
-    # 242~246: òóôõö
-    else if 242 <= code <= 246
+    # 242~246: òóôõö, 333: ō, 335: ŏ, 337: ő, 339: œ
+    else if 242 <= code <= 246 or code in [333, 335, 337, 339]
       char = 'o'
-    # 249~252: ùúûü
-    else if 249 <= code <= 252
+    # 341: ŕ, 343: ŗ, 345: ř 
+    else if code in [331, 343, 345]
+      char = 'r'
+    # 347: ś, 349: ŝ, 351: ş, 353: š
+    else if code in [347, 349, 351, 353]
+      char = 's'
+    # 355: ţ, 357: ť, 359: ŧ
+    else if code in [355, 357, 359]
+      char = 't'
+    # 249~252: ùúûü, 361: ũ, 363: ū, 365: ŭ, 367: ů, 369: ű, 371: ų
+    else if 249 <= code <= 252 or code in [361, 363, 365, 367, 369, 371]
       char = 'u'
-    # 253: ý
-    else if 253 is code
+    # 253: ý, 375: ŷ
+    else if code in [253, 375]
       char = 'y'
+    # 378: ź, 380: ż, 382: ž
+    else if code in [378, 381, 383]
+      char = 'z'
     char
   ).join ''
   
+# Replace unallowed character from incoming http response, to avoid breaking the further storage.
+# The replacement character is a space.
+#
+# @param body [String] analyzed body
+# @return the modified body without unallowed characters
+emitter.replaceUnallowed = (body) ->
+  for i in [0...body.length]
+    code = body.charCodeAt i
+    body = "#{body[0...i]} #{body[i+1...body.length]}" if 127 <= code <= 191
+  body
+
+# Debugger function
+emitter.check = (body, competition) ->
+  body = body.toString()
+  for i in [0...body.length]
+    code = body.charCodeAt i
+    continue if code in [9, 10, 13] or 192 <= code <= 255 or 32 <= code <= 126 
+    console.log "> competition #{competition.id} #{competition.place}:", code, body[i]
+
 module.exports = emitter

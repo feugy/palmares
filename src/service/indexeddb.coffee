@@ -80,7 +80,7 @@ module.exports = class IndexedDB extends Storage
       tx = @db.transaction [storeName], 'readwrite'
       
       # set the value for a given key
-      request = tx.objectStore(storeName).put JSON.parse(JSON.stringify(obj)), key
+      request = tx.objectStore(storeName).put JSON.parse(JSON.stringify obj), key
 
       # handle errors and success
       tx.onerror = -> callback tx.error
@@ -101,4 +101,20 @@ module.exports = class IndexedDB extends Storage
       # handle errors and success
       tx.onerror = -> callback tx.error
       tx.oncomplete = -> callback null, rehydrate request.result
+    , callback
+
+  # @see Storage.remove
+  remove: (key, callback = ->) =>
+    # opens databse before if needed
+    @_runOrOpen =>
+      return callback new Error "no key provided" unless _.isString key
+      # opens a read-only transaction
+      tx = @db.transaction [storeName], 'readwrite'
+      
+      # get the value of a given key
+      request = tx.objectStore(storeName).delete key
+
+      # handle errors and success
+      tx.onerror = -> callback tx.error
+      tx.oncomplete = -> callback null
     , callback

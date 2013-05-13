@@ -44,3 +44,11 @@ module.exports = class Storage
   # @option callback obj [Object] the corresponding stored object, or undefined
   pop: (key, callback) =>
     callback new Error "#{@opts.name} does not implement the 'pop' feature"
+
+  # Removed an object by its.
+  #
+  # @param key [String] removed key
+  # @param callback [Function] end callback, invoked with arguments:
+  # @option callback err [Error] an Error object, or null if no error occured
+  remove: (key, callback) =>
+    callback new Error "#{@opts.name} does not implement the 'remove' feature"

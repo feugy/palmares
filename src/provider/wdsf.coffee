@@ -56,7 +56,7 @@ module.exports = class WDSFProvider extends Provider
       return callback err if err?
     
       # extract contests ranking ids
-      $ = cheerio.load body.toString()
+      $ = cheerio.load util.replaceUnallowed body.toString()
       urls = ("#{@opts.url}#{$(link).attr 'href'}" for link in $ '.grid td > a' when $(link).text() isnt 'Upcoming')
       competition.contests = []
       # no contests yet
@@ -76,7 +76,7 @@ module.exports = class WDSFProvider extends Provider
     # ignore header
     return if record[0] is 'Date'
     data = 
-      place: _.titleize "#{record[2].trim()} #{record[1].replace('WDSF', '')?.trim()}".toLowerCase()
+      place: _.titleize util.removeAccents "#{record[2].trim()} #{record[1].replace('WDSF', '')?.trim()}"
       date: moment record[0], @opts.dateFormat
       url: record[8][0...record[8].lastIndexOf '/']
       provider: 'wdsf'
@@ -110,7 +110,7 @@ module.exports = class WDSFProvider extends Provider
       return callback new Error "error on contest #{url}: #{err}" if err?
 
       # extract ranking
-      $ = cheerio.load body.toString()
+      $ = cheerio.load util.replaceUnallowed body.toString()
       results = 
         # competition's title
         title: $('h1').first().text().replace 'Ranking of ', ''

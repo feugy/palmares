@@ -42,6 +42,7 @@ To build the windows installer, download [NSIS](http://nsis.sourceforge.net/Main
 v1.2.0
 
   - add filtering buttons on competition list
+  - fix accent bug on some contest titles
 
 v1.1.0
 
