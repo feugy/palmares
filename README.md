@@ -39,6 +39,11 @@ To build the windows installer, download [NSIS](http://nsis.sourceforge.net/Main
 
 # Release notes
 
+v1.3.0
+  
+  - allow export all competitions of a given couple
+  - fix proxy settings that were not saved
+
 v1.2.0
 
   - add filtering buttons on competition list

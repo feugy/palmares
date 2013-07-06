@@ -11,6 +11,7 @@ HomeView = require './view/home'
 CoupleView = require './view/couple'
 CompetitionView = require './view/competition'
 AboutView = require './view/about'
+SettingsView = require './view/settings'
 ui = require './util/ui'
 util = require './util/common'
 
@@ -84,23 +85,11 @@ module.exports = class Router extends EventEmitter
   # @param event [Event] optionnal cancelled click event
   _onSettings: (event) =>
     event?.preventDefault()
-    settings = ui.popup @i18n.titles.settings, """
-      <form class="form-horizontal">
-        <div class="control-group">
-          <label class="control-label">#{@i18n.labels.proxy}</label>
-          <div class="controls">
-            <input class="proxy" type="text" value="#{util.confKey 'proxy', ''}">
-          </div>
-        </div>
-      </form>
-    """, [
-      text: @i18n.buttons.cancel
-    ,
+    view = new SettingsView()
+    settings = ui.popup @i18n.titles.settings, view.$el, [text: @i18n.buttons.cancel,
       text: @i18n.buttons.save
       className: 'btn-primary'
-      click: =>
-        # save new configuration values
-        util.saveKey 'proxy', settings.find('.proxy').val().trim() or undefined
+      click: view.save
     ]
 
   # **private**

@@ -52,6 +52,8 @@ module.exports = class HomeView extends View
     'click .competition': '_onOpenCompetition'
     'click .remove': '_onRemove'
     'click .export': '_onExport'
+    'click .export-competition': '_onExportCompetition'
+    'click .export-couple': '_onExportCouple'
     'click .filter .dropdown-menu li': '_onFilter'
 
   # Home View constructor
@@ -90,7 +92,10 @@ module.exports = class HomeView extends View
         """
         <li class="couple" data-name="#{couple.name}">
           <span class="name">#{couple.name}</span>
-          <a class="untrack btn btn-warning pull-right" href="#"><i class="icon-trash"></i></a>
+          <span class="pull-right">
+            <a class="export-couple btn" href="#"><i class="icon-download"></i></a>
+            <a class="untrack btn btn-warning" href="#"><i class="icon-trash"></i></a>
+          </span>
         </li>
         """
     ).join ''
@@ -100,6 +105,7 @@ module.exports = class HomeView extends View
     storage.pop 'newly', (err, values) =>
       @_onResult couple:name for name of values
     @$('.untrack').tooltip html: true, title: @i18n.tips.untrack, delay: 750
+    @$('.export-couple').tooltip html: true, title: @i18n.tips.exportCouple, delay: 750
 
   # refresh only the list of competitions
   renderCompetitions: =>
@@ -121,7 +127,7 @@ module.exports = class HomeView extends View
           <span class="date">#{competition.date.format @i18n.dateFormat}</span>
           <span class="name">#{competition.place}</span> 
           <span class="pull-right">
-            <a class="export btn" href="#"><i class="icon-download"></i></a>
+            <a class="export-competition btn" href="#"><i class="icon-download"></i></a>
             <a class="remove btn btn-warning" href="#"><i class="icon-trash"></i></a>
           </span>
         </li>
@@ -130,29 +136,52 @@ module.exports = class HomeView extends View
     # warning for too restrictive filter
     list.after "<div class='no-competitions'>#{@i18n.msgs.restrictiveFilter}</div>" if list.children().length is 0
     @$('.remove').tooltip html: true, title: @i18n.tips.remove, delay: 750
-    @$('li .export').tooltip html: true, title: @i18n.tips.export, delay: 750
+    @$('.export-competition').tooltip html: true, title: @i18n.tips.exportCompetition, delay: 750
+
+  # **private**
+  # Common behaviour of export function: handle error and opens a file selection popup to write xlsx content into
+  #
+  # @param err [Error] optionnal export error
+  # @param result [Object] exported xlsx content
+  # @param name [String] exported file name
+  _saveExportPopup: (err, result, name) =>
+    return util.popup @i18n.titles.exportError, _.sprintf @i18n.errors.export, err.message if err?
+    # display a file selection dialog
+    fileDialog = $("<input style='display:none' type='file' value='#{name}.xlsx' nwsaveas accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'>").trigger 'click'
+    fileDialog.on 'change', =>
+      file = fileDialog[0].files?[0]?.path
+      return unless file?
+      console.log "export palmares in file: #{file}"
+      fs.writeFile normalize(file), new Buffer(xlsx(result).base64, 'base64'), (err) =>
+        util.popup @i18n.titles.exportError, _.sprintf @i18n.errors.export, err.message if err?
 
   # **private**
   # Exports global palmares to xlsx format
   _onExport: (event) =>
     event?.preventDefault()
+    # get xlsx content
+    service.export (err, result) =>
+      @_saveExportPopup err, result, @i18n.titles.application
+
+  # **private**
+  # Exports competition palmares to xlsx format
+  _onExportCompetition: (event) =>
+    # to avoid opening the competition
+    event?.stopImmediatePropagation()
+    event?.preventDefault()
+    # get xlsx content
+    service.exportCompetitions [$(event?.target).closest('li.competition').data 'id'], (err, result) =>
+      @_saveExportPopup err, result, $(event?.target).closest('li.competition').find('.name').text()
+
+  # **private**
+  # Exports couple palmares to xlsx format
+  _onExportCouple: (event) =>
     # to avoid opening the couple
     event?.stopImmediatePropagation()
-    # get exported competition if specified
-    id = $(event?.target).closest('li.competition').data 'id' 
-    name = $(event?.target).closest('li.competition').find('.name').text() or @i18n.titles.application
+    event?.preventDefault()
     # get xlsx content
-    service.export (if id? then [id] else null), (err, result) =>
-      return util.popup @i18n.titles.exportError, _.sprintf @i18n.errors.export, err.message if err?
-      # display a file selection dialog
-      fileDialog = $("<input style='display:none' type='file' value='#{name}.xlsx' nwsaveas accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'>").trigger 'click'
-      fileDialog.on 'change', =>
-        file = fileDialog[0].files?[0]?.path
-        console.log fileDialog[0].files?[0]
-        return unless file?
-        console.log "export palmares in file: #{file}"
-        fs.writeFile normalize(file), new Buffer(xlsx(result).base64, 'base64'), (err) =>
-          util.popup @i18n.titles.exportError, _.sprintf @i18n.errors.export, err.message if err?
+    service.exportCouples [$(event?.target).closest('li.couple').data 'name'], (err, result) =>
+      @_saveExportPopup err, result, $(event?.target).closest('li.couple').find('.name').text()
 
   # **private**
   # Display a popup to select new tracked couples

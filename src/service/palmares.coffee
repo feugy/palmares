@@ -70,7 +70,7 @@ module.exports = class PalmaresService extends EventEmitter
     for provider in @providers
       provider.on 'progress', (args...) => @emit.apply @, ['progress'].concat args
 
-  # Return palmares of track couple, sort by competition date
+  # Return palmares of tracked couple, sort by competition date
   #
   # @param couple [String] concerned couple name
   # @param callback [Function] end callback. Invoked with arguments:
@@ -258,21 +258,46 @@ module.exports = class PalmaresService extends EventEmitter
   # Export global palmares to XlsX.js compliant format.
   # Each competition is summarized with all related couples and their rankings
   #
-  # @param compIds [Array]. Optionnal array of competition ids to be exported. If not specified (or null), all competitions are exported.
   # @param callback [Function] end callback. Invoked with arguments:
   # @option callback error [Error] an Error object, or null if no error occured
   # @option callback xlsx [Array] XlsX.js compliant content, with global palmares
-  export: (compIds, callback) =>
-    [callback, compIds] = [compIds, null] if _.isFunction compIds
-    # select relevant competitions and sort them by date (newest at last)
-    if compIds?
-      competitions = _.unique (@competitions[id] for id in compIds)
-    else
-      competitions = _.values @competitions
-    competitions.sort((c1, c2) -> c1.date.unix() - c2.date.unix()) 
+  export: (callback) =>
+    # all competitions, all couples
+    @_export _.values(@competitions), @tracked, callback
 
-    # takes all tracked details
-    couples = @tracked
+  # Export palmares of selected couples to XlsX.js compliant format.
+  # Only competitions of concerned couples are present with theirtheir rankings
+  #
+  # @param names [Array]. Array of couple names to be exported.
+  # @param callback [Function] end callback. Invoked with arguments:
+  # @option callback error [Error] an Error object, or null if no error occured
+  # @option callback xlsx [Array] XlsX.js compliant content, with global palmares
+  exportCouples: (names, callback) =>
+    # filters only selected couples
+    @_export _.values(@competitions), (couple for couple in @tracked when couple.name in names), callback
+
+  # Export palmares of selected competitions to XlsX.js compliant format.
+  # Each competition is summarized with all related couples and their rankings
+  #
+  # @param compIds [Array]. Array of competition ids to be exported.
+  # @param callback [Function] end callback. Invoked with arguments:
+  # @option callback error [Error] an Error object, or null if no error occured
+  # @option callback xlsx [Array] XlsX.js compliant content, with global palmares
+  exportCompetitions: (compIds, callback) =>
+    # filters only selected competitions
+    @_export _.unique((@competitions[id] for id in compIds)), @tracked, callback
+
+  # **private**
+  # Internal export failure, common to `export()`, `exportCouples()` and `exportCompetitions()`
+  #
+  # @param competitions [Array] array of exported competitions
+  # @param couples [Array] array of exported couples (same format as `@tracked`)
+  # @param callback [Function] end callback. Invoked with arguments:
+  # @option callback error [Error] an Error object, or null if no error occured
+  # @option callback xlsx [Array] XlsX.js compliant content, with global palmares
+  _export: (competitions, couples, callback) =>
+    # sort competitions by date
+    competitions.sort((c1, c2) -> c1.date.unix() - c2.date.unix())  
 
     xlsx = 
       creator: @i18n.appTitle

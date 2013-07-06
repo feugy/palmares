@@ -89,7 +89,8 @@ errors:
 
 tips:
   exportAll: Export tous les résultats des couples suivis
-  export: Exporte les résultats des couples suivis pour cette competition
+  exportCompetition: Exporte les résultats des couples suivis pour cette competition
+  exportCouple: Exporte tous les résultats de ce couple
   remove: Supprime cette compétition de la liste
   untrack: Arréter de suivre ce couple
   filter: Masque ou montres certaines compétitions
