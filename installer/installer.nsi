@@ -33,12 +33,14 @@ section
   file ..\README.md
   file ..\index.html
   file /r ..\bin
-  file /r ..\conf
   file /r ..\lib
   file /r ..\nls
   file /r ..\node_modules
   file /r ..\style
   file /r ..\template
+
+  setOutPath $LOCALAPPDATA\palmares
+  file /r ..\conf
 
   ; creates a shortcut within installation folder and on desktop
   createShortCut "$INSTDIR\Palmares.lnk" "$INSTDIR\bin\nw.exe" '"$INSTDIR"' "$INSTDIR\style\ribas-icon.ico"
@@ -47,7 +49,7 @@ section
   ; populate indexedDB
   !define APP_DATA $LOCALAPPDATA\palmares\IndexedDB\file__0.indexeddb.leveldb
   ; upgrade case: replace existing data
-  rmdir /r ${APP_DATA}
+  ; rmdir /r ${APP_DATA}
   
   IfFileExists ${APP_DATA}\*.* noop loadData
 
@@ -77,12 +79,12 @@ section "Uninstall"
   delete $INSTDIR\README.md
   delete $INSTDIR\index.html
   rmdir /r $INSTDIR\bin
-  rmdir /r $INSTDIR\conf
   rmdir /r $INSTDIR\lib
   rmdir /r $INSTDIR\nls
   rmdir /r $INSTDIR\node_modules
   rmdir /r $INSTDIR\style
   rmdir /r $INSTDIR\template
+  rmdir /r $LOCALAPPDATA\palmares\conf
   delete $INSTDIR\Palmares.lnk
   delete $DESKTOP\Palmares.lnk
  

@@ -2,19 +2,25 @@
 
 yaml = require 'js-yaml'
 fs = require 'fs-extra'
-pathUtils = require 'path'
+{resolve, join} = require 'path'
 _ = require 'underscore'
 EventEmitter = require('events').EventEmitter
 _.str = require 'underscore.string'
 _.mixin _.str.exports()
+env = process.env.NODE_ENV?.trim()?.toLowerCase() or 'dev'
 
 # use an event emitter to propagate configuration changes
 emitter = new EventEmitter()
 emitter.setMaxListeners 0
 
-# read configuration file
+# read configuration file from application folder
 conf = null
-confPath = pathUtils.resolve __dirname, pathUtils.join '..', '..', 'conf', "#{if process.env.NODE_ENV then process.env.NODE_ENV else 'dev'}-conf.yml"
+
+if env is 'test'
+  confPath = resolve __dirname, join '..', '..', 'conf', "#{env}-conf.yml"
+else
+  confPath = join gui.App.dataPath[0], 'conf', "#{env}-conf.yml"
+
 parseConf = ->
   try 
     conf = yaml.load fs.readFileSync confPath, 'utf-8'

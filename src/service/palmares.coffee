@@ -201,9 +201,8 @@ module.exports = class PalmaresService extends EventEmitter
     , (err) =>
       @emit 'progress', 'end', err
       inProgress = false
-      return callback err if err?
       # nothing new.
-      return callback null, [] if newCompetitions.length is 0
+      return callback err, [] if newCompetitions.length is 0
 
       # Update storage for new competitions
       @competitions[competition.id] = competition for competition in newCompetitions
@@ -214,7 +213,7 @@ module.exports = class PalmaresService extends EventEmitter
         # Update storage for new couples results
         @storage.push 'tracked', @tracked, (err) =>
           console.error "failed to add new tracked couples: #{err}" if err?
-          callback null, results
+          callback err, results
 
   # Remove couples from the tracked list.
   # If some couple was not track, does not fail.
