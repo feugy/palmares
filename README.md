@@ -14,7 +14,7 @@ Thanks to Node-webkit that provides a desktop-sandalone-nodejs integrated versio
 
 # Users: how to install
 
-Download the last installer [here](https://docs.google.com/file/d/0ByVTTZ_jn2IsT2d2aXI3LU12R0U/edit?usp=sharing), and follow installation steps.
+Download the last installer [here](https://drive.google.com/folderview?id=0ByVTTZ_jn2IsYmc5b3p3ZDlLNG8&usp=sharing), and follow installation steps.
 
 Only windows is supported for now. For other OS, please contact me or try to build it.
 
