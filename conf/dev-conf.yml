@@ -1,7 +1,7 @@
 providers: 
   FFDS: 
     name: Fédération Française de Danse Sportive
-    url: "http://www.ffddansesportive.com"
+    url: "http://dansesportive.ffdanse.fr"
     list: "compet-resultats.php"
     details: "compet-resultats.php?NumManif=%1$s"
     clubs: "compet-situation.php"

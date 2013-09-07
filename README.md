@@ -39,6 +39,11 @@ To build the windows installer, download [NSIS](http://nsis.sourceforge.net/Main
 
 # Release notes
 
+v1.4.0
+  
+  - take in account international dance sport pages change that prevent result extraction
+  - use new french dance sport website
+
 v1.3.0
   
   - allow export all competitions of a given couple

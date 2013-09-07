@@ -1,13 +1,15 @@
 providers:
-
   FFDS:
     name: Fédération Française de Danse Sportive
-    url: http://www.ffddansesportive.com
-    list: compet-resultats.php
+    url: "http://dansesportive.ffdanse.fr"
+    list: "compet-resultats.php"
+    details: "compet-resultats.php?NumManif=%1$s"
+    clubs: "compet-situation.php"
+    couples: "compet-situation.php?club_id=%1s&Recherche_Club="
+    search: "compet-situation.php?couple_name=%1$s&Recherche_Nom="
     dateFormat: DD/MM/YYYY
-
   WDSF:
     name: World Danse Sport Federation
-    url: http://www.worlddancesport.org
-    list: 'Calendar/Competition/Results#format=List&month=%2s&year=%1s&kindFilter=Competition'
-    dateFormat: DD/MM/YYYY
+    url: "http://www.worlddancesport.org"
+    list: "Calendar/Competition/Results?format=csv&downloadFromDate=14/08/%1$s&downloadToDate=15/08/%2$s&kindFilter=Competition"
+    dateFormat: YYYY/MM/DD

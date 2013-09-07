@@ -97,7 +97,7 @@ module.exports = class FFDSProvider extends Provider
       competitions = []
       for line in $ 'table#tosort > tbody > tr'
         competition = @_extractHeader $(line)
-        competitions.push competition if competition?
+        competitions.push competition if competition?.date?.year() is moment().year()
       return callback null, _.sortBy competitions, 'date'
 
   # @see Provider.getDetails()
@@ -184,7 +184,7 @@ module.exports = class FFDSProvider extends Provider
     request
       # to avoid encoding problems
       encoding: 'binary'
-      url: _.sprintf "#{@opts.url}/#{@opts.search}", encodeURIComponent searched
+      url: _.sprintf "#{@opts.url}/#{@opts.search}", encodeURIComponent searched.toUpperCase()
       proxy: util.confKey 'proxy', ''
     , (err, res, body) =>
       if !(err?) and res?.statusCode isnt 200
@@ -202,14 +202,14 @@ module.exports = class FFDSProvider extends Provider
   _extractNames: (body, callback) =>
     couples = []
     $ = cheerio.load util.replaceUnallowed body.toString()
-    for couple in $ '#tosort tr'
+    for couple in $ '#tosort tbody tr'
       couple = $(couple)
       # ignore inactive couples
-      if couple.find('td:last-child').text() is 'Oui' 
-        try
-          couples.push cleanNames couple.find('td:first-child').text().trim().replace ' / ', '<br>'
-        catch exc
-          return callback new Error "failed to parse couple names '#{names}': #{exc}"
+      #if couple.find('td:last-child').text() is 'Oui' 
+      try
+        couples.push cleanNames couple.find('td:first-child').text().trim().replace ' / ', '<br>'
+      catch exc
+        return callback new Error "failed to parse couple names '#{names}': #{exc}"
     # return results
     callback null, couples
 

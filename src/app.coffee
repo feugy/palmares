@@ -46,7 +46,7 @@ process.on 'uncaughtException', (err) ->
   process.exit() unless global.router?
 
 # DOM is ready
-win.on 'loaded', ->
+win.once 'loaded', ->
   global.console = window.console
 
   # opens dev tools on F12 or Command+Option+J

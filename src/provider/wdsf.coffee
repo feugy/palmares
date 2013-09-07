@@ -101,7 +101,7 @@ module.exports = class WDSFProvider extends Provider
   # @option callback err [String] an error object or null if no error occured
   _extractRanking: (competition, url, callback) =>
     request
-      url: url
+      url: "#{url}/Ranking"
       proxy: util.confKey 'proxy', ''
     , (err, res, body) =>
       # http error for the contest detail
@@ -109,20 +109,24 @@ module.exports = class WDSFProvider extends Provider
         err = new Error  new Error "failed to fetch contest ranking from '#{@opts.name} #{competition.place}': #{res.statusCode}\n#{body}"
       return callback new Error "error on contest #{url}: #{err}" if err?
 
-      # extract ranking
-      $ = cheerio.load util.replaceUnallowed body.toString()
-      results = 
-        # competition's title
-        title: $('h1').first().text().replace 'Ranking of ', ''
-        results: {}
+      # Unless contest was cancelled...
+      body = body.toString()
+      if -1 is body.indexOf 'Cancelled'
+        # extract ranking
+        $ = cheerio.load util.replaceUnallowed body
+        results = 
+          # competition's title
+          title: $('h1').first().text().replace 'Ranking of ', ''
+          results: {}
 
-      # for each heat (first is final)
-      for heat in $ '.list'
-        for row in $(heat).find 'tbody > tr'
-          name = $(row).find('td:nth-child(2)').text()
-          rank = $(row).find('td:nth-child(1)').text()
-          results.results[_.titleize util.removeAccents name] = parseInt rank
+        # for each heat (first is final)
+        for heat in $ '.list'
+          for row in $(heat).find 'tbody > tr'
+            name = $(row).find('td:nth-child(2)').text()
+            rank = $(row).find('td:nth-child(1)').text()
+            results.results[_.titleize util.removeAccents name] = parseInt rank
 
-      competition.contests.push results
+        competition.contests.push results
+
       @emit 'progress', 'contestEnd', competition: competition, done: competition.contests.length
       callback null
