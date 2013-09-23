@@ -39,6 +39,10 @@ To build the windows installer, download [NSIS](http://nsis.sourceforge.net/Main
 
 # Release notes
 
+v1.4.1
+
+  - fix WDSF provider to automatically use the proper year range when getting competition list
+
 v1.4.0
   
   - take in account international dance sport pages change that prevent result extraction

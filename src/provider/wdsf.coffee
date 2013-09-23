@@ -24,10 +24,14 @@ module.exports = class WDSFProvider extends Provider
   # @option callback err [String] an error object or null if no error occured
   # @option callback results [Array] list of competitions extracted (may be empty).
   listResults: (callback = ->) =>
+    now = moment()
+    year = now.year()
+    # after mid august: add one to the year
+    year++ if now.month() > 7 or now.month() is 7 and now.date() > 14
     # performs itself the request
     request
       # to avoid encoding problems
-      url: _.sprintf "#{@opts.url}/#{@opts.list}", moment().year()-1, moment().year()
+      url: _.sprintf "#{@opts.url}/#{@opts.list}", year-1, year
       proxy: util.confKey 'proxy', ''
     , (err, res, body) =>
       if !(err?) and res?.statusCode isnt 200
