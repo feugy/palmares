@@ -36,17 +36,21 @@ module.exports = class CompetitionView extends View
     @competition = service.competitions[id]
     return router.navigate 'home' unless @competition?
     @date = @competition.date.format @i18n.dateFormat 
-    @contests = (
-      for contest in @competition.contests
-        title: contest.title
-        results: _.sortBy (
-          for name, rank of contest.results
-            name: name
-            rank: rank
-            # keep tracked couples to add links
-            tracked: _.find(service.tracked, (c) -> c.name is name)?
-        ), 'rank'
-    )
+    # if no contests found, allow empty displayal
+    if @competition?.contests?
+      @contests = (
+        for contest in @competition.contests
+          title: contest.title
+          results: _.sortBy (
+            for name, rank of contest.results
+              name: name
+              rank: rank
+              # keep tracked couples to add links
+              tracked: _.find(service.tracked, (c) -> c.name is name)?
+          ), 'rank'
+      )
+    else
+      @contests = []
     @render()
 
   # **private**

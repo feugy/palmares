@@ -15,6 +15,8 @@ ProgressView = require './progress'
 # @param filter [String] current filter
 # @return true if competition can be displayed, false otherwise
 isDisplayed = (competition, filter) ->
+  # if no contests found, allow displayal to remove it.
+  return true unless competition?.contests?
   return true if filter is 'none'
   if filter is 'national'
     return competition?.provider is 'ffds'

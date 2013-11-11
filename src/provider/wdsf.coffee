@@ -58,7 +58,7 @@ module.exports = class WDSFProvider extends Provider
       if !(err?) and res?.statusCode isnt 200
         err = new Error "failed to fetch contests from '#{@opts.name} #{competition.place}': #{res.statusCode}\n#{body}"
       return callback err if err?
-    
+      
       # extract contests ranking ids
       $ = cheerio.load util.replaceUnallowed body.toString()
       urls = ("#{@opts.url}#{$(link).attr 'href'}" for link in $ '.grid td > a' when $(link).text() isnt 'Upcoming')
@@ -104,13 +104,14 @@ module.exports = class WDSFProvider extends Provider
   # @param callback [Function] end callback, invoked with arguments:
   # @option callback err [String] an error object or null if no error occured
   _extractRanking: (competition, url, callback) =>
+    url = "${url}/Ranking" unless _.endsWith url, "/Ranking"
     request
-      url: "#{url}/Ranking"
+      url: url
       proxy: util.confKey 'proxy', ''
     , (err, res, body) =>
       # http error for the contest detail
       if !(err?) and res?.statusCode isnt 200
-        err = new Error  new Error "failed to fetch contest ranking from '#{@opts.name} #{competition.place}': #{res.statusCode}\n#{body}"
+        err = new Error "failed to fetch contest ranking from '#{@opts.name} #{competition.place}': #{res.statusCode}\n#{body}"
       return callback new Error "error on contest #{url}: #{err}" if err?
 
       # Unless contest was cancelled...

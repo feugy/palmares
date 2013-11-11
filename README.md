@@ -39,6 +39,10 @@ To build the windows installer, download [NSIS](http://nsis.sourceforge.net/Main
 
 # Release notes
 
+v1.4.2
+
+  - fix WDSF provider to adapt to ranking list new format 
+
 v1.4.1
 
   - fix WDSF provider to automatically use the proper year range when getting competition list
