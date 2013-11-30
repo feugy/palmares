@@ -4,6 +4,7 @@ _ = require 'underscore'
 async = require 'async'
 {EventEmitter} = require 'events'
 Ranking = require '../model/ranking'
+Cleaner = require '../service/cleaner'
 
 # security flag to avoid triggering update and tracking at the same time.
 inProgress = false
@@ -58,17 +59,18 @@ module.exports = class PalmaresService extends EventEmitter
   # @param providers [Array] array of providers used to get competitions. 
   # @param i18n [Object] labels used inside the export.
   constructor: (@storage, @providers, @i18n) ->
-    # restore state from storage
-    @storage.pop 'tracked', (err, value) =>
-      console.error "failed to restore tracked couples: #{err}" if err?
-      @tracked = value or []
-      @storage.pop 'competitions', (err, value) =>
-        console.error "failed to restore competitions: #{err}" if err?
-        @competitions = value or {}
-        @emit 'ready'
-    # relay providers events 
-    for provider in @providers
-      provider.on 'progress', (args...) => @emit.apply @, ['progress'].concat args
+    Cleaner.sanitize @storage, =>
+      # restore state from storage
+      @storage.pop 'tracked', (err, value) =>
+        console.error "failed to restore tracked couples: #{err}" if err?
+        @tracked = value or []
+        @storage.pop 'competitions', (err, value) =>
+          console.error "failed to restore competitions: #{err}" if err?
+          @competitions = value or {}
+          @emit 'ready'
+      # relay providers events 
+      for provider in @providers
+        provider.on 'progress', (args...) => @emit.apply @, ['progress'].concat args
 
   # Return palmares of tracked couple, sort by competition date
   #
@@ -201,8 +203,12 @@ module.exports = class PalmaresService extends EventEmitter
     , (err) =>
       @emit 'progress', 'end', err
       inProgress = false
+      # something bad happens
+      if err?
+        console.error "failed to refresh competitions: #{err}" 
+        return callback err, []
       # nothing new.
-      return callback err, [] if newCompetitions.length is 0
+      return callback null, [] if newCompetitions.length is 0
 
       # Update storage for new competitions
       @competitions[competition.id] = competition for competition in newCompetitions
@@ -296,7 +302,7 @@ module.exports = class PalmaresService extends EventEmitter
   # @option callback xlsx [Array] XlsX.js compliant content, with global palmares
   _export: (competitions, couples, callback) =>
     # sort competitions by date
-    competitions.sort((c1, c2) -> c1.date.unix() - c2.date.unix())  
+    competitions = competitions.sort((c1, c2) -> c2.date.unix() - c1.date.unix())
 
     xlsx = 
       creator: @i18n.appTitle
@@ -329,6 +335,7 @@ module.exports = class PalmaresService extends EventEmitter
         for result, i in results
           [lat, std] = ['', 'x']
           [lat, std] = ['x', ''] if result.kind is 'lat'
+          [lat, std] = ['x', 'x'] if result.kind is 'ten'
           borders = right:bColor
           borders.bottom = bColor if i is results.length-1
           sheet.data.push [
@@ -360,7 +367,7 @@ module.exports = class PalmaresService extends EventEmitter
       # look into the last heat result, where all contest's competitors are listed
       total = _.keys(contest.results).length
       continue if total is 0
-      kind = if /standard/i.test contest.title then 'std' else 'lat'
+      kind = if /standard/i.test contest.title then 'std' else if /ten/i.test contest.title then 'ten' else 'lat'
       for couple in couples when couple.name of contest.results
         # to find rank, walk down from the final
         couple.palmares[competition.id] = [] unless competition.id of couple.palmares

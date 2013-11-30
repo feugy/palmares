@@ -9,6 +9,8 @@ global.gui = gui
 global.$ = $
 # first require: use path relative to index.html
 Router = require './lib/router.js'
+Cleaner = require './lib/service/cleaner.js'
+Storage = require './lib/service/indexeddb.js'
 _ = require 'underscore'
 isMaximized = false
 
@@ -40,14 +42,19 @@ win.on 'unmaximize', -> isMaximized = false
 win.on 'minimize', -> isMaximized = false
 
 # Display on dev tools the caught error and do not crash
-process.on 'uncaughtException', (err) ->
-  console.error err.stack
-  fs.appendFileSync 'error.txt', "------\n#{moment().format 'DD/MM/YYYY HH:mm:ss'}\n#{err.stack}\n"
+process.on 'uncaughtException', errorHandler = (err, file, line) ->
+  if file?
+    err = "#{err} (#{file}:#{line})"
+  else if err instanceof Error
+    err = err.stack
+  console.error err
+  fs.appendFileSync 'error.txt', "------\n#{moment().format 'DD/MM/YYYY HH:mm:ss'}\n#{err}\n"
   process.exit() unless global.router?
 
 # DOM is ready
 win.once 'loaded', ->
   global.console = window.console
+  window.onerror = errorHandler
 
   # opens dev tools on F12 or Command+Option+J
   $(window).on 'keyup', (event) ->
@@ -65,16 +72,20 @@ win.once 'loaded', ->
   else
     infos = require './package.json'
     win.resizeTo infos.window.min_width, infos.window.min_height,
+  
+  # init storage service
+  global.storage = new Storage()
+  Cleaner.sanitize global.storage, ->
 
-  # we are ready: shows it !
-  win.show()
-  # local storage stores strings !
-  win.maximize() if 'true' is localStorage.getItem 'maximized'
+    # we are ready: shows it !
+    win.show()
+    # local storage stores strings !
+    win.maximize() if 'true' is localStorage.getItem 'maximized'
 
-  # start main application, after window is shown
-  _.delay ->
-    global.router = new Router()
+    # start main application, after window is shown
     _.delay ->
-      splash.close true
-    , 50
-  , 100
+      global.router = new Router()
+      _.delay ->
+        splash.close true
+      , 50
+    , 100

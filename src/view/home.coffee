@@ -16,7 +16,7 @@ ProgressView = require './progress'
 # @return true if competition can be displayed, false otherwise
 isDisplayed = (competition, filter) ->
   # if no contests found, allow displayal to remove it.
-  return true unless competition?.contests?
+  #return true unless competition?.contests?
   return true if filter is 'none'
   if filter is 'national'
     return competition?.provider is 'ffds'
@@ -149,7 +149,7 @@ module.exports = class HomeView extends View
   _saveExportPopup: (err, result, name) =>
     return util.popup @i18n.titles.exportError, _.sprintf @i18n.errors.export, err.message if err?
     # display a file selection dialog
-    fileDialog = $("<input style='display:none' type='file' value='#{name}.xlsx' nwsaveas accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'>").trigger 'click'
+    fileDialog = $("<input style='display:none' type='file' nwsaveas='#{name}.xlsx' accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'>").trigger 'click'
     fileDialog.on 'change', =>
       file = fileDialog[0].files?[0]?.path
       return unless file?
@@ -239,6 +239,9 @@ module.exports = class HomeView extends View
 
     # trigger update and render competitions
     service.update (err, results) =>
+      if err?
+        popup.modal 'hide'
+        return util.popup @i18n.titles.refreshError, _.sprintf @i18n.errors.refresh, err.message 
       console.log 'new results found:', results
       @renderCompetitions()
       # close popup with a slight delay to show progress

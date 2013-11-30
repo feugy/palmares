@@ -25,6 +25,7 @@ module.exports = class CompetitionView extends View
   events: 
     'click .home': '_onHome'
     'click li': '_onOpenCouple'
+    'click a.external': '_onOpenSource'
 
   # Competition View constructor
   # Immediately renders the view, or navigate to home if competition does not exist
@@ -34,6 +35,7 @@ module.exports = class CompetitionView extends View
   constructor: (id) ->
     super className: 'details'
     @competition = service.competitions[id]
+    console.log @competition
     return router.navigate 'home' unless @competition?
     @date = @competition.date.format @i18n.dateFormat 
     # if no contests found, allow empty displayal
@@ -52,6 +54,16 @@ module.exports = class CompetitionView extends View
     else
       @contests = []
     @render()
+
+
+  # **private**
+  # Ask system to open default browser on competition url
+  #
+  # @param event [Event] cancelled click event
+  _onOpenSource: (event) =>
+    console.log @competition
+    gui.Shell.openExternal @competition.url
+    event?.preventDefault()
 
   # **private**
   # Navigate to the home page.

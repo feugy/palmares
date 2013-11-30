@@ -4,6 +4,7 @@ titles:
   competitions: Compétitions
   trackCouples: Ajouter des couples
   trackError: Erreur lors du suivi
+  refreshError: Erreur lors du rafraichissement
   confirm: Confirmation
   update: Mise à jour des compétitions
   exportError: "Erreur d'exportation"
@@ -29,6 +30,7 @@ labels:
   filterNational: Compétitions nationnales
   filterInternational: Compétitions internationnales
   filterCouples: Compétitions des couples
+  source: consulter le site web
 
 msgs:
   loading: chargement en cours...
@@ -74,14 +76,29 @@ errors:
     <p>Nous sommes désolé : nous ne pouvons établir le palmarès de ce(s) couple(s).</p>
     <p>L'erreur suivante est survenue :</p>
     <blockquote>%1s</blockquote>
-    <p>Vous pouvez :
-      <ol><li>Vérifier que votre connexion internet est correcte</li>
-      <li>Vérifier l'orthographe des noms et prénoms des couples ajoutés</li></ol>
+    <p>Merci de :
+      <ol><li>Copier le contenu de cette fenêtre</li>
+      <li>l'envoyer par mail à damien.feugas@gmail.com</li>
+      <li>d'y joindre le fichier "error.txt" présent dans le dossier d'installation de palmares</li></ol>
+    </p>
+  refresh: >
+    <p>Nous sommes désolé : une partie de la récupération à échouée.</p>
+    <p>L'erreur suivante est survenue :</p>
+    <blockquote>%1s</blockquote>
+    <p>Merci de :
+      <ol><li>Copier le contenu de cette fenêtre</li>
+      <li>l'envoyer par mail à damien.feugas@gmail.com</li>
+      <li>d'y joindre le fichier "error.txt" présent dans le dossier d'installation de palmares</li></ol>
     </p>
   export: >
     <p>Nous sommes désolé : l'export Excell ne peut être réalisé.</p>
     <p>L'erreur suivante est survenue :</p>
     <blockquote>%1s</blockquote>
+    <p>Merci de :
+      <ol><li>Copier le contenu de cette fenêtre</li>
+      <li>l'envoyer par mail à damien.feugas@gmail.com</li>
+      <li>d'y joindre le fichier "error.txt" présent dans le dossier d'installation de palmares</li>
+    </p>
   noPalmares: >
     <div class="alert alert-warning">Ce couple n'a participé à aucune compétition connue</div>
   noContests: >
@@ -111,10 +128,10 @@ about:
     <p>Les informations sont récupérés sur les pages web publiques des fournisseurs suivants :</p>
   contact: >
     <p>Conception, réalisation et design par Damien Feugas <em>damien.feugas@gmail.com</em></p>
-    <p class="copyright">Copyright 2013 © Damien Feugas</p>
+    <p class="copyright">Copyright 2013-2014 © Damien Feugas</p>
   providers:
     - name: Fédération Française de Danse Sportive 
-      credits: Copyright 2009 © FFD-CNSDS. Tous droits réservés <em>www.ffddansesportive.com</em>
+      credits: Copyright 2009 © FFD-CNSDS. Tous droits réservés <em>dansesportive.ffdanse.fr</em>
     - name: World DanseSport federation
       credits: © Copyright WDSF 2010-2012 All rights Reserved <em>www.worlddancesport.org</em>
 

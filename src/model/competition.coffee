@@ -23,5 +23,6 @@ module.exports = class Competition
     id: @id
     place: @place
     date: @date.toDate()
+    url: @url
     provider: @provider
     contests: @contests

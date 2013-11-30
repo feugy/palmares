@@ -39,6 +39,21 @@ To build the windows installer, download [NSIS](http://nsis.sourceforge.net/Main
 
 # Release notes
 
+v1.5.0
+
+  - fix FFD provider year management
+  - bump node-webkit: faster execution, and allow to set exported filename in "save file" dialog
+  - bump underscore.string: names are properly capitalized
+  - bump other libraries
+  - enhance WDSF provider: detect competition of the same place and similar date
+  - enhance providers: remove parenthesis in title, 
+  - enhance error reporting, especially while retrieving
+  - link on data source from competition view
+  - support 'ten' as result kind, in addition to 'lat' and 'std'
+  - new cleaner utility to remove old competitions without contest results
+  - order results from newer to older in excel exports
+  - installer with data until 2013-11-28 for CVDS couples
+
 v1.4.2
 
   - fix WDSF provider to adapt to ranking list new format 

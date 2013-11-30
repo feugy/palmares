@@ -413,6 +413,24 @@ input:not([type=button]):not([type=submit]):focus
 
 .details
 
+  .external
+    position relative
+    top -5px
+    font-size 120%
+  .external:after
+    content ''
+    background-image url(glyphicons-halflings.png)
+    background-position: -336px -96px
+    display inline-block
+    position relative
+    height size = 14px
+    width size
+    right -5px
+    top 2px
+
+  .external, .external:focus, .external:hover, .external:visited
+    color primaryColor
+
   .box .date
     position absolute
     background contrastBackground

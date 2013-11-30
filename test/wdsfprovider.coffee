@@ -42,6 +42,17 @@ describe 'WDSF provider tests', ->
       fs.createReadStream(join 'test', 'fixtures', '18979-S1-Lat.html').pipe res
     app.get '/Event/Competition/Open-San_Lazzaro_di_Savena_\\(Bologna\\)-18979/Senior_II-Latin-43977/Ranking', (req, res, next) ->
       fs.createReadStream(join 'test', 'fixtures', '18979-S2-Lat.html').pipe res
+    # Kiev championship, with multiple references
+    app.get '/Event/Competition/World_Championship-Kiev-18507/Adult-Standard-42617/Ranking', (req, res, next) ->
+      fs.createReadStream(join 'test', 'fixtures', '5255-Ch-Std.html').pipe res
+    app.get '/Event/Competition/World_Open-Kiev-19282/Adult-Latin-44881/Ranking', (req, res, next) ->
+      fs.createReadStream(join 'test', 'fixtures', '5255-Ad-Lat.html').pipe res
+    app.get '/Event/Competition/World_Open-Kiev-19282/Adult-Standard-44882/Ranking', (req, res, next) ->
+      fs.createReadStream(join 'test', 'fixtures', '5255-Ad-Std.html').pipe res
+    app.get '/Event/Competition/Open-Kiev-19283/Youth-Latin-44883/Ranking', (req, res, next) ->
+      fs.createReadStream(join 'test', 'fixtures', '5255-Yo-Lat.html').pipe res
+    app.get '/Event/Competition/Open-Kiev-19283/Youth-Standard-44884/Ranking', (req, res, next) ->
+      fs.createReadStream(join 'test', 'fixtures', '5255-Yo-Std.html').pipe res
 
     server = http.createServer app
     server.listen port, (err) ->
@@ -60,16 +71,25 @@ describe 'WDSF provider tests', ->
 
     service.listResults (err, results) ->
       return done "failed to get result list: #{err}" if err?
-
-      expect(results).to.have.length 
-      expect(results[0].place).to.equal 'San Lazzaro Di Savena (bologna) Open'
+      
+      expect(results).to.have.length 38
+      
+      # should competition with different names on same days and place have been merged
+      expect(results[0].place).to.equal 'San Lazzaro Di Savena (bologna)'
       expect(results[0].id).to.equal '50a4fe09e8017722760eae59990cd270'
       expect(results[0].toJSON().date).to.deep.equal moment('2013-01-04').toDate()
-    
-      expect(results[1].place).to.equal 'Moscow Open'
+      
+      # should competition on several days have been merged
+      expect(results[1].place).to.equal 'Moscow'
       expect(results[1].id).to.equal '7b2c13ad6cd1b171b39e88b5a42703f0'
       expect(results[1].toJSON().date).to.deep.equal moment('2013-01-05').toDate()
 
+      # should Kiev World Open, Kiev World Standard and Kiev Open have been merged into one competition
+      expect(results[36].place).not.to.equal 'Kiev'
+
+      expect(results[37].place).to.equal 'Kiev'
+      expect(results[37].id).to.equal '47f054cb2b6ea38d416acdf32bec0ee4'
+      expect(results[37].toJSON().date).to.deep.equal moment('2013-11-23').toDate()
       done()
 
   it 'should simple competition contest list be retrieved', (done) ->

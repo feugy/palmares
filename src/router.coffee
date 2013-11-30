@@ -5,7 +5,6 @@ EventEmitter = require('events').EventEmitter
 util = require './util/common'
 FFDS = require './provider/ffds'
 WDSF = require './provider/wdsf'
-Storage = require './service/indexeddb'
 PalmaresService = require './service/palmares'
 HomeView = require './view/home'
 CoupleView = require './view/couple'
@@ -37,7 +36,6 @@ module.exports = class Router extends EventEmitter
       new FFDS util.confKey 'providers.FFDS'
       new WDSF util.confKey 'providers.WDSF'
     ]
-    global.storage = new Storage()
     @service = new PalmaresService storage, @providers, _.extend {appTitle: @i18n.titles.application}, @i18n.export
     global.service = @service
     global.searchProvider = @providers[0]

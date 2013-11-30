@@ -1,6 +1,7 @@
 <h2 class="right box"><span class="text">{{competition.place}}</span><span class="date">{{date}}</span><span class="image"></span></h2>
 <div class="content">
   <a class="home btn btn-primary btn-large" href="#"><i class="icon-home"></i>{{i18n.buttons.home}}</a>
+  {{#competition.url}}<a class="external" href="#">{{i18n.labels.source}}</a>{{/competition.url}}
   {{^contests}}
   {{i18n.msgs.noContests}}
   {{/contests}}

@@ -63,6 +63,9 @@ cleanContest = (original) ->
 # Extract national competitions from the Ballroom Dancing National Federation
 module.exports = class FFDSProvider extends Provider
 
+  # Current year
+  currYear: null
+
   # Club list, to avoid asking too many time them
   clubs: null
 
@@ -72,8 +75,14 @@ module.exports = class FFDSProvider extends Provider
   # @param opts [Object] provider configuration. Must contains:
   # @option opts clubs [String] url to list exsting clubs
   # @option opts couples [String] url to list couples of a given club
+  # @option opts details [String] url to get competition details
+  # @option opts search [String] url to search for couples
   constructor: (opts) ->
     super opts
+    now = moment()
+    @currYear = now.year()
+    # after mid august: removes one to the year
+    @currYear-- if now.month() < 7 or now.month() is 7 and now.date() <= 14
     throw new Error "missing 'clubs' property in provider configuration" unless _.has @opts, 'clubs'
     throw new Error "missing 'couples' property in provider configuration" unless _.has @opts, 'couples'
     throw new Error "missing 'details' property in provider configuration" unless _.has @opts, 'details'
@@ -95,9 +104,14 @@ module.exports = class FFDSProvider extends Provider
       # extract competiton headers for each lines
       $ = cheerio.load util.replaceUnallowed body.toString()
       competitions = []
+
       for line in $ 'table#tosort > tbody > tr'
         competition = @_extractHeader $(line)
-        competitions.push competition if competition?.date?.year() is moment().year()
+        date = competition?.date
+        # only keep competition in current year after mid august, or next year before mid august
+        if (date?.year() is @currYear and (date?.month() > 7 or date?.month() is 7 and date?.date() > 14)) or
+            (date?.year() is @currYear+1 and (date?.month() < 7 or date?.month() is 7 and date?.date() <= 14))
+          competitions.push competition
       return callback null, _.sortBy competitions, 'date'
 
   # @see Provider.getDetails()
@@ -227,6 +241,8 @@ module.exports = class FFDSProvider extends Provider
       date: moment line.find('td').eq(1).text(), @opts.dateFormat
       url: _.sprintf "#{@opts.url}/#{@opts.details}", id
       provider: 'ffds'
+    # removes parenthesis information if present
+    data.place = data.place.replace(/\(\s*\w+\s*\)/, '').trim()
     # id is date append to place lowercased without non-word characters.
     data.id = md5 "#{_.slugify data.place}#{data.date.format 'YYYYMMDD'}"
     new Competition data

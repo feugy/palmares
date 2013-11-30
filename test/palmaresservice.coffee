@@ -19,7 +19,7 @@ describe 'Palmares service tests', ->
   server = null
   storage = new MemoryStorage name: 'in-memory'
   couples = [
-    'Kylian Da Costa - Romane Tourral-ferjoux'
+    'Kylian Da Costa - Romane Tourral-Ferjoux'
     'Damien Feugas - Laeticia Simonin Feugas'
     'Jonathan Bouchard - Sophie Thomas'
   ]
@@ -85,6 +85,7 @@ describe 'Palmares service tests', ->
         couples: 'compet-situation.php?club_id=%1s&Recherche_Club='
         search: 'compet-situation.php?couple_name=%1$s&Recherche_Nom='
         dateFormat: 'DD/MM/YYYY'
+      ffds.currYear = 2012
 
       service = new PalmaresService storage, [ffds], i18n
       # bind a listener on events
@@ -261,7 +262,7 @@ describe 'Palmares service tests', ->
       
       # then the new competition match two tracked couples
       expect(results[0].competition.id).to.equal '4ca82205bf98ae50dc4beede80be8370'
-      expect(results[0].competition.place).to.equal 'Bagnols-sur-cèze (30)'
+      expect(results[0].competition.place).to.equal 'Bagnols-Sur-Cèze (30)'
       expect(results[0].competition.date.unix()).to.equal moment('2013-03-31').unix()
       expect(results[0].results).to.have.length 2
       res = _.find results[0].results, (r) -> r.contest is 'Juniors II E Latines'
@@ -315,8 +316,8 @@ describe 'Palmares service tests', ->
       data = JSON.stringify sheet.data, null, 2
       expect(data).to.include 'Bourg En Bresse 19/01/2013'
       expect(data).to.include 'Bourg En Bresse 02/03/2013'
-      expect(data).to.include 'Bagnols-sur-cèze (30) 30/03/2013'
-      expect(data).to.include 'Bagnols-sur-cèze (30) 31/03/2013'
+      expect(data).to.include 'Bagnols-Sur-Cèze (30) 30/03/2013'
+      expect(data).to.include 'Bagnols-Sur-Cèze (30) 31/03/2013'
       expect(data).to.include couples[0]
       expect(data).to.include couples[1]
       expect(data).to.include couples[2]
@@ -346,8 +347,8 @@ describe 'Palmares service tests', ->
       data = JSON.stringify sheet.data, null, 2
       expect(data).to.include 'Bourg En Bresse 19/01/2013'
       expect(data).not.to.include 'Bourg En Bresse 02/03/2013'
-      expect(data).to.include 'Bagnols-sur-cèze (30) 30/03/2013'
-      expect(data).not.to.include 'Bagnols-sur-cèze (30) 31/03/2013'
+      expect(data).to.include 'Bagnols-Sur-Cèze (30) 30/03/2013'
+      expect(data).not.to.include 'Bagnols-Sur-Cèze (30) 31/03/2013'
       expect(data).to.include couples[0]
       expect(data).to.include couples[1]
       expect(data).not.to.include couples[2]
@@ -377,8 +378,8 @@ describe 'Palmares service tests', ->
       data = JSON.stringify sheet.data, null, 2
       expect(data).to.include 'Bourg En Bresse 19/01/2013'
       expect(data).to.include 'Bourg En Bresse 02/03/2013'
-      expect(data).not.to.include 'Bagnols-sur-cèze (30) 30/03/2013'
-      expect(data).to.include 'Bagnols-sur-cèze (30) 31/03/2013'
+      expect(data).not.to.include 'Bagnols-Sur-Cèze (30) 30/03/2013'
+      expect(data).to.include 'Bagnols-Sur-Cèze (30) 31/03/2013'
       expect(data).not.to.include couples[0]
       expect(data).to.include couples[1]
       expect(data).to.include couples[2]
@@ -403,7 +404,7 @@ describe 'Palmares service tests', ->
       expect(results).to.have.length 2
       # then first competition is last added
       expect(results[0].competition.id).to.equal '4ca82205bf98ae50dc4beede80be8370'
-      expect(results[0].competition.place).to.equal 'Bagnols-sur-cèze (30)'
+      expect(results[0].competition.place).to.equal 'Bagnols-Sur-Cèze (30)'
       expect(results[0].results).to.have.length 1
       expect(results[0].results[0].toJSON()).to.deep.equal  
         couple: couples[1]

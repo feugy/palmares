@@ -14,8 +14,22 @@ util = require '../util/common'
 # Extract national competitions from the Ballroom Dancing National Federation
 module.exports = class WDSFProvider extends Provider
 
+  # Current year
+  currYear: null
+
   # temporary array to store parsed competitions
   models: []
+
+  # Provider constructor: initialize with configuration
+  # For mandatory options, @see Provider.constructor
+  #
+  # @param opts [Object] provider configuration. Must contains:
+  constructor: (opts) ->
+    super opts
+    now = moment()
+    @currYear = now.year()
+    # after mid august: removes one to the year
+    @currYear-- if now.month() <= 7 or now.month() is 7 and now.date() <= 14
 
   # Provide a custom sync method to extract competitions over the internet.
   # Only read operation is supported.
@@ -24,14 +38,10 @@ module.exports = class WDSFProvider extends Provider
   # @option callback err [String] an error object or null if no error occured
   # @option callback results [Array] list of competitions extracted (may be empty).
   listResults: (callback = ->) =>
-    now = moment()
-    year = now.year()
-    # after mid august: add one to the year
-    year++ if now.month() > 7 or now.month() is 7 and now.date() > 14
     # performs itself the request
     request
       # to avoid encoding problems
-      url: _.sprintf "#{@opts.url}/#{@opts.list}", year-1, year
+      url: _.sprintf "#{@opts.url}/#{@opts.list}", @currYear, @currYear+1
       proxy: util.confKey 'proxy', ''
     , (err, res, body) =>
       if !(err?) and res?.statusCode isnt 200
@@ -80,19 +90,29 @@ module.exports = class WDSFProvider extends Provider
     # ignore header
     return if record[0] is 'Date'
     data = 
-      place: _.titleize util.removeAccents "#{record[2].trim()} #{record[1].replace('WDSF', '')?.trim()}"
+      # place is city (rank 3)
+      place: _.titleize util.removeAccents record[2].trim()
+      # date at first rank
       date: moment record[0], @opts.dateFormat
+      # url is rank 9, but removes contest specific part of the url to only keep the competition url
       url: record[8][0...record[8].lastIndexOf '/']
       provider: 'wdsf'
     # id is url, because date+place is not unique.
     data.id = md5 data.url
+    # removes parenthesis information if present
+    data.place = data.place.replace(/\(\s*\w+\s*\)/, '').trim()
 
+    # search for existing competition with same url
     existing = _.find @models, (comp) -> comp.id is data.id
+    unless existing?
+      # competition at the same place with same or adjacent date are the same
+      existing = _.find @models, (comp) -> comp.place is data.place and comp.date.diff(data.date, 'days') in [-2..2]
+      
     if existing?
       # Always keep the first competition day
       existing.date = data.date if existing.date.isAfter data.date
     else
-      # do not add twice the same competition
+     # do not add twice the same competition
       @models.push new Competition data 
 
   # **private**
@@ -104,7 +124,7 @@ module.exports = class WDSFProvider extends Provider
   # @param callback [Function] end callback, invoked with arguments:
   # @option callback err [String] an error object or null if no error occured
   _extractRanking: (competition, url, callback) =>
-    url = "${url}/Ranking" unless _.endsWith url, "/Ranking"
+    url = "#{url}/Ranking" unless _.endsWith url, "/Ranking"
     request
       url: url
       proxy: util.confKey 'proxy', ''
@@ -123,6 +143,10 @@ module.exports = class WDSFProvider extends Provider
           # competition's title
           title: $('h1').first().text().replace 'Ranking of ', ''
           results: {}
+        subtitle = $('h1').first().next().text()
+        if subtitle?
+          subtitle = subtitle[0...subtitle.indexOf 'taken'].replace('The following results are from the WDSF', '').trim()
+          results.title += " #{subtitle}"
 
         # for each heat (first is final)
         for heat in $ '.list'

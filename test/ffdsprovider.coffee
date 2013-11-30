@@ -18,6 +18,7 @@ describe 'FFDS provider tests', ->
   server = null
 
   before (done) ->
+    # creates a fake server
     app = express()
     app.use express.methodOverride()
     app.use app.router
@@ -78,12 +79,13 @@ describe 'FFDS provider tests', ->
           couples: 'compet-situation.php?club_id=%1s&Recherche_Club='
           search: 'compet-situation.php?couple_name=%1$s&Recherche_Nom='
           dateFormat: 'DD/MM/YYYY'
+      # mock year to match test files
+      #service.currYear = 2012
       done()
 
-  after -> server?.close()
+  after (done) -> server?.close done
 
   it 'should competition list be retrieved', (done) ->
-
     service.listResults (err, results) ->
       return done "failed to get result list: #{err}" if err?
 
@@ -202,7 +204,7 @@ describe 'FFDS provider tests', ->
       expect(results).to.deep.equal [
         'Jean Marc Brunel - Noella Simon'
         'Damien Feugas - Laeticia Simonin Feugas'
-        'Gilles Picard - Cecile Simon-juarez'
+        'Gilles Picard - Cecile Simon-Juarez'
         'Florent Simon - Justine Ernult'
       ]
       done()
@@ -233,10 +235,13 @@ describe 'FFDS provider tests', ->
 
       expect(results).to.deep.equal [
         'Patrick Duong - Chau Bui Thi Huyen'
-        'Alain Fauqueux - Anne-marie Fauqueux'
+        'Alain Fauqueux - Anne-Marie Fauqueux'
         'Jean Claude Fumat - Genevieve Legier'
+        'Denis Garcin - Stevie Broc'
+        'Frederic Jover - Emilie Verone'
         'Henri Muller - Miroslawa Muller'
         'Roger Nogier - Pascale Nogier'
+        'Louis Ortega - Solange Ortega'
         'Alain Roux - Maryse Jenna'
         'Daniel Savarino - Claire Morris'
         'Stephane Vaillant - Audrey Lambinet' 

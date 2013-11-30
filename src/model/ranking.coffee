@@ -9,7 +9,7 @@ module.exports = class Ranking
   # the contest kind (may contains age-category and dance-category)
   contest: null
 
-  # dance kind: 'std' or 'lat'
+  # dance kind: 'std', 'lat' or 'ten'
   kind: null
 
   # couple final ranking

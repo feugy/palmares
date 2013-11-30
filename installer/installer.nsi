@@ -49,7 +49,7 @@ section
   ; populate indexedDB
   !define APP_DATA $LOCALAPPDATA\palmares\IndexedDB\file__0.indexeddb.leveldb
   ; upgrade case: replace existing data
-  ; rmdir /r ${APP_DATA}
+  rmdir /r ${APP_DATA}
   
   IfFileExists ${APP_DATA}\*.* noop loadData
 

@@ -19,7 +19,7 @@ conf = null
 if env is 'test'
   confPath = resolve __dirname, join '..', '..', 'conf', "#{env}-conf.yml"
 else
-  confPath = join gui.App.dataPath[0], 'conf', "#{env}-conf.yml"
+  confPath = join gui.App.dataPath, 'conf', "#{env}-conf.yml"
 
 parseConf = ->
   try 
