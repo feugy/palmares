@@ -39,6 +39,16 @@ To build the windows installer, download [NSIS](http://nsis.sourceforge.net/Main
 
 # Release notes
 
+v1.6.0
+
+  - fix WDSF competition retrival: avoid duplicates without loosing data (allows multiple urls per competition)
+  - distinguish days of the same international competition
+  - cleaner removes couples results for unexisting competitions
+  - removes an unnecessary cleaner invokation
+  - allow competition to fail during update
+  - removes debug logs
+  - erase exsiting data with included values (CVDS) 
+
 v1.5.0
 
   - fix FFD provider year management

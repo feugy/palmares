@@ -17,6 +17,7 @@ module.exports = class Competition
     @[attr] = value for attr, value of attrs
     throw new Error 'no id provided for competition' unless @id?
     @date = moment @date
+    @dataUrls = [@url] unless @dataUrls?.length > 0
 
   # @return a plain JSON representation of this competition
   toJSON: =>
@@ -26,3 +27,4 @@ module.exports = class Competition
     url: @url
     provider: @provider
     contests: @contests
+    dataUrls: @dataUrls

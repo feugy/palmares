@@ -44,12 +44,14 @@ msgs:
     <p>Aucune compétition ne correspond à ce filtre.</p>
     <p>Veuillez choisir un autre filtre, ou utiliser le bouton de mise à jour.</p>
   chooseCouple: >
-    <p>Choisissez le nom d'un couple : prénom et nom du cavalier, '-', prénom et nom de la cavalière.</p>
+    <p>Choisissez le nom d'un couple :</p>
     <p>Par exemple:</p>
-    <blockquote>Pierre Durand - Melanie Dupont-aubois</blockquote>
+    <blockquote>Pierre Durand - Melanie Dupont-Aubois</blockquote>
+    <p>Une fois le nom de famille entré, attendez les suggestions.</p>
   chooseGroup: >
     <p>Vous pouvez aussi suivre tous les couples actifs d'un club (ville, '/', sigle) :</p>
     <blockquote>Paris/PDSC</blockquote>
+    <p>Attendez la suggestion, puis attendez le nombre de couples licenciés dans le club.</p>
   untrack: >
     <p>Souhaitez vous vraiment ne plus suivre les couples suivants ?</p>
     <p class="text-warning">%1$s</p>

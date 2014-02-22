@@ -59,18 +59,17 @@ module.exports = class PalmaresService extends EventEmitter
   # @param providers [Array] array of providers used to get competitions. 
   # @param i18n [Object] labels used inside the export.
   constructor: (@storage, @providers, @i18n) ->
-    Cleaner.sanitize @storage, =>
-      # restore state from storage
-      @storage.pop 'tracked', (err, value) =>
-        console.error "failed to restore tracked couples: #{err}" if err?
-        @tracked = value or []
-        @storage.pop 'competitions', (err, value) =>
-          console.error "failed to restore competitions: #{err}" if err?
-          @competitions = value or {}
-          @emit 'ready'
-      # relay providers events 
-      for provider in @providers
-        provider.on 'progress', (args...) => @emit.apply @, ['progress'].concat args
+    # restore state from storage
+    @storage.pop 'tracked', (err, value) =>
+      console.error "failed to restore tracked couples: #{err}" if err?
+      @tracked = value or []
+      @storage.pop 'competitions', (err, value) =>
+        console.error "failed to restore competitions: #{err}" if err?
+        @competitions = value or {}
+        @emit 'ready'
+    # relay providers events 
+    for provider in @providers
+      provider.on 'progress', (args...) => @emit.apply @, ['progress'].concat args
 
   # Return palmares of tracked couple, sort by competition date
   #
@@ -194,9 +193,12 @@ module.exports = class PalmaresService extends EventEmitter
           # get details
           @emit 'progress', 'compStart', competition
           provider.getDetails competition, (err) =>
-            return next2 err if err?
+            if err?
+              # remove failing competition now, to be retrieved later
+              console.error err
+              newCompetitions.splice newCompetitions.indexOf competition, 1
             # keep competition
-            @_analyze @tracked, competition, results 
+            @_analyze @tracked, competition, results unless err?
             @emit 'progress', 'compEnd', competition
             next2()
         , next

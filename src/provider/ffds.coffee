@@ -116,7 +116,7 @@ module.exports = class FFDSProvider extends Provider
 
   # @see Provider.getDetails()
   getDetails: (competition, callback) =>
-    return callback new Error "No details url in competition '#{@opts.name} #{competition.place}'" unless competition.url
+    return callback new Error "No details url in competition '#{@opts.name} #{competition.place}'" unless competition.url?
     # request contests list
     request
       # to avoid encoding problems

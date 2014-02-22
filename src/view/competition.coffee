@@ -35,7 +35,6 @@ module.exports = class CompetitionView extends View
   constructor: (id) ->
     super className: 'details'
     @competition = service.competitions[id]
-    console.log @competition
     return router.navigate 'home' unless @competition?
     @date = @competition.date.format @i18n.dateFormat 
     # if no contests found, allow empty displayal
@@ -61,7 +60,6 @@ module.exports = class CompetitionView extends View
   #
   # @param event [Event] cancelled click event
   _onOpenSource: (event) =>
-    console.log @competition
     gui.Shell.openExternal @competition.url
     event?.preventDefault()
 

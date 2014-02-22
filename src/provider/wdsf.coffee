@@ -5,8 +5,8 @@ async = require 'async'
 request = require 'request'
 moment = require 'moment'
 csv = require 'csv'
-cheerio = require 'cheerio'
 md5 = require('md5').digest_s
+cheerio = require 'cheerio'
 Provider = require './provider'
 Competition = require '../model/competition'
 util = require '../util/common'
@@ -59,22 +59,27 @@ module.exports = class WDSFProvider extends Provider
 
   # @see Provider.getDetails()
   getDetails: (competition, callback) =>
-    return callback new Error "No details url in competition '#{@opts.name} #{competition.place}'" unless competition.url
-    # request contests list
-    request
-      url: competition.url
-      proxy: util.confKey 'proxy', ''
-    , (err, res, body) =>
-      if !(err?) and res?.statusCode isnt 200
-        err = new Error "failed to fetch contests from '#{@opts.name} #{competition.place}': #{res.statusCode}\n#{body}"
-      return callback err if err?
-      
-      # extract contests ranking ids
-      $ = cheerio.load util.replaceUnallowed body.toString()
-      urls = ("#{@opts.url}#{$(link).attr 'href'}" for link in $ '.grid td > a' when $(link).text() isnt 'Upcoming')
-      competition.contests = []
+    return callback new Error "No details url in competition '#{@opts.name} #{competition.place}'" unless competition.dataUrls?.length > 0
+    urls = []
+    # request contests list, for each known urls
+    async.eachSeries competition.dataUrls, (url, next) =>
+      request
+        url: url
+        proxy: util.confKey 'proxy', ''
+      , (err, res, body) =>
+        if !(err?) and res?.statusCode isnt 200
+          err = new Error "failed to fetch contests from '#{@opts.name} #{competition.place}': #{res.statusCode}\n#{body}"
+        return next err if err?
+        # extract contests ranking ids
+        $ = cheerio.load util.replaceUnallowed body.toString()
+        # find competition list for the competition date only
+        for day, i in $ '.competitionList > h3' when competition.date.isSame $(day).text()
+          urls = urls.concat ("#{@opts.url}#{$(link).attr 'href'}" for link in $ ".competitionList table:nth-of-type(#{i+1}) a" when $(link).text() isnt 'Upcoming')
+        next()
+    , (err) =>
       # no contests yet
       return callback null unless urls.length
+      competition.contests = []
       @emit 'progress', 'contestsRetrieved', competition: competition, total: urls.length
       # get all contests rankings
       return async.eachSeries urls, (url, next) =>
@@ -89,6 +94,7 @@ module.exports = class WDSFProvider extends Provider
   _extractHeader: (record) =>
     # ignore header
     return if record[0] is 'Date'
+
     data = 
       # place is city (rank 3)
       place: _.titleize util.removeAccents record[2].trim()
@@ -97,23 +103,19 @@ module.exports = class WDSFProvider extends Provider
       # url is rank 9, but removes contest specific part of the url to only keep the competition url
       url: record[8][0...record[8].lastIndexOf '/']
       provider: 'wdsf'
-    # id is url, because date+place is not unique.
-    data.id = md5 data.url
     # removes parenthesis information if present
     data.place = data.place.replace(/\(\s*\w+\s*\)/, '').trim()
-
+    # id is date append to place lowercased without non-word characters.
+    data.id = md5 "#{_.slugify data.place}#{data.date.format 'YYYYMMDD'}"
+    
     # search for existing competition with same url
-    existing = _.find @models, (comp) -> comp.id is data.id
+    existing = _.findWhere @models, id: data.id
     unless existing?
-      # competition at the same place with same or adjacent date are the same
-      existing = _.find @models, (comp) -> comp.place is data.place and comp.date.diff(data.date, 'days') in [-2..2]
-      
-    if existing?
-      # Always keep the first competition day
-      existing.date = data.date if existing.date.isAfter data.date
-    else
-     # do not add twice the same competition
+      # do not add twice the same competition
       @models.push new Competition data 
+    else unless data.url in existing.dataUrls
+      # Merge urls if needed
+      existing.dataUrls.push data.url
 
   # **private**
   # Extract a competition's contest ranking from contest's id.
@@ -148,14 +150,15 @@ module.exports = class WDSFProvider extends Provider
           subtitle = subtitle[0...subtitle.indexOf 'taken'].replace('The following results are from the WDSF', '').trim()
           results.title += " #{subtitle}"
 
-        # for each heat (first is final)
-        for heat in $ '.list'
-          for row in $(heat).find 'tbody > tr'
-            name = $(row).find('td:nth-child(2)').text()
-            rank = $(row).find('td:nth-child(1)').text()
-            results.results[_.titleize util.removeAccents name] = parseInt rank
-
-        competition.contests.push results
+        # check competition unicity
+        unless _.findWhere(competition.contests, title:results.title, subtitle:results.subtitle)?
+          # for each heat (first is final)
+          for heat in $ '.list'
+            for row in $(heat).find 'tbody > tr'
+              name = $(row).find('td:nth-child(2)').text()
+              rank = $(row).find('td:nth-child(1)').text()
+              results.results[_.titleize util.removeAccents name] = parseInt rank
+          competition.contests.push results
 
       @emit 'progress', 'contestEnd', competition: competition, done: competition.contests.length
       callback null
