@@ -1,6 +1,8 @@
 'use strict'
 
 _ = require 'underscore'
+{safeLoad} = require 'js-yaml'
+{readFileSync} = require 'fs-extra'
 View = require '../view/view'
 util = require '../util/ui'
 
@@ -10,7 +12,7 @@ module.exports = class CompetitionView extends View
   template: require '../../template/competition.html'
 
   # i18n object for rendering
-  i18n: require '../../nls/common.yml'
+  i18n: safeLoad readFileSync "#{__dirname}/../../nls/common.yml"
 
   # rendered competition
   competition: null

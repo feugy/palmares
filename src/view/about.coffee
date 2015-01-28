@@ -1,5 +1,7 @@
 'use strict'
 
+{safeLoad} = require 'js-yaml'
+{readFileSync} = require 'fs-extra'
 View = require '../view/view'
 
 module.exports = class AboutView extends View
@@ -8,7 +10,7 @@ module.exports = class AboutView extends View
   template: require '../../template/about.html'
 
   # i18n object for rendering
-  i18n: require '../../nls/common.yml'
+  i18n: safeLoad readFileSync "#{__dirname}/../../nls/common.yml"
 
   # version udisplayed, read from package.json
   version: ''

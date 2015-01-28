@@ -2,6 +2,7 @@
 
 _ = require 'underscore'
 express = require 'express'
+methodOverride = require 'method-override'
 moment = require 'moment'
 http = require 'http'
 fs = require 'fs-extra'
@@ -38,8 +39,7 @@ describe 'Palmares service tests', ->
 
   before (done) ->
     app = express()
-    app.use express.methodOverride()
-    app.use app.router
+    app.use methodOverride()
     app.get '/compet-resultats.php', (req, res, next) ->
       res.charset = 'iso-8859-1'
       res.type 'html'
@@ -85,7 +85,6 @@ describe 'Palmares service tests', ->
         couples: 'compet-situation.php?club_id=%1s&Recherche_Club='
         search: 'compet-situation.php?couple_name=%1$s&Recherche_Nom='
         dateFormat: 'DD/MM/YYYY'
-      ffds.currYear = 2012
 
       service = new PalmaresService storage, [ffds], i18n
       # bind a listener on events
@@ -107,8 +106,7 @@ describe 'Palmares service tests', ->
 
       # then one competition was found related to both couples
       competition = _.find results, (r) -> r.competition.id is 'a281637604e1ac8ffd1eeb51e58e7adf'
-      expect(competition).to.be.defined
-      expect(competition.results).to.have.length 2
+      expect(competition).to.exist.and.to.have.property('results').that.has.lengthOf 2
       res = _.find competition.results, (r) -> r.couple is couples[0]
       expect(res).to.be.defined
       expect(res.toJSON()).to.deep.equal
@@ -127,9 +125,8 @@ describe 'Palmares service tests', ->
         total: 9
 
       # then one competition was found related to one couple with two occurences
-      competition = _.find results, (r) -> r.competition.id is 'e3a7748ff934c9020e76fd9748220192'
-      expect(competition).to.be.defined
-      expect(competition.results).to.have.length 2
+      competition = _.find results, (r) -> r.competition.id is 'ba26f16638b950fa938e423a34fc7305'
+      expect(competition).to.exist.and.to.have.property('results').that.has.lengthOf 2
       res = _.find competition.results, (r) -> r.contest is 'Juniors II E Latines'
       expect(res).to.be.defined
       expect(res.toJSON()).to.deep.equal
@@ -159,16 +156,16 @@ describe 'Palmares service tests', ->
           rank: 5
           total: 14
         ]
-        expect(value[1].palmares).to.have.property 'e3a7748ff934c9020e76fd9748220192'
-        expect(value[1].palmares.e3a7748ff934c9020e76fd9748220192).to.have.length 2 
-        res = _.find value[1].palmares.e3a7748ff934c9020e76fd9748220192, (r) -> r.contest is 'Juniors II E Latines'
+        expect(value[1].palmares).to.have.property 'ba26f16638b950fa938e423a34fc7305'
+        expect(value[1].palmares.ba26f16638b950fa938e423a34fc7305).to.have.length 2 
+        res = _.find value[1].palmares.ba26f16638b950fa938e423a34fc7305, (r) -> r.contest is 'Juniors II E Latines'
         expect(res.toJSON()).to.deep.equal 
           couple: couples[0]
           kind: 'lat'
           contest: 'Juniors II E Latines'
           rank: 5
           total: 28 
-        res = _.find value[1].palmares.e3a7748ff934c9020e76fd9748220192, (r) -> r.contest is 'Open Juvéniles I Juvéniles II Juniors I Juniors II C D E Latines'
+        res = _.find value[1].palmares.ba26f16638b950fa938e423a34fc7305, (r) -> r.contest is 'Open Juvéniles I Juvéniles II Juniors I Juniors II C D E Latines'
         expect(res.toJSON()).to.deep.equal 
           couple: couples[0]
           kind: 'lat'
@@ -261,8 +258,8 @@ describe 'Palmares service tests', ->
       expect(results).to.have.length 1
       
       # then the new competition match two tracked couples
-      expect(results[0].competition.id).to.equal '4ca82205bf98ae50dc4beede80be8370'
-      expect(results[0].competition.place).to.equal 'Bagnols-Sur-Cèze (30)'
+      expect(results[0].competition.id).to.equal 'da84f7326d92212d7cd5c58c89c6c6b6'
+      expect(results[0].competition.place).to.equal 'Bagnols-Sur-Cèze'
       expect(results[0].competition.date.unix()).to.equal moment('2013-03-31').unix()
       expect(results[0].results).to.have.length 2
       res = _.find results[0].results, (r) -> r.contest is 'Juniors II E Latines'
@@ -287,11 +284,11 @@ describe 'Palmares service tests', ->
         expect(value).to.have.length 3
         expect(value[2].name).to.equal couples[0]
         expect(value[2].palmares).to.have.property 'a281637604e1ac8ffd1eeb51e58e7adf'
-        expect(value[2].palmares).to.have.property 'e3a7748ff934c9020e76fd9748220192'
-        expect(value[2].palmares).to.have.property '4ca82205bf98ae50dc4beede80be8370'
+        expect(value[2].palmares).to.have.property 'ba26f16638b950fa938e423a34fc7305'
+        expect(value[2].palmares).to.have.property 'da84f7326d92212d7cd5c58c89c6c6b6'
         expect(value[0].name).to.equal couples[1]
         expect(value[0].palmares).to.have.property 'a281637604e1ac8ffd1eeb51e58e7adf'
-        expect(value[0].palmares).to.have.property '4ca82205bf98ae50dc4beede80be8370'
+        expect(value[0].palmares).to.have.property 'da84f7326d92212d7cd5c58c89c6c6b6'
 
         # then some result events were issued
         events = ['compEnd', 'compRetrieved', 'compStart', 'contestEnd', 'contestEnd', 'contestsRetrieved', 'end', 'start']
@@ -316,8 +313,8 @@ describe 'Palmares service tests', ->
       data = JSON.stringify sheet.data, null, 2
       expect(data).to.include 'Bourg En Bresse 19/01/2013'
       expect(data).to.include 'Bourg En Bresse 02/03/2013'
-      expect(data).to.include 'Bagnols-Sur-Cèze (30) 30/03/2013'
-      expect(data).to.include 'Bagnols-Sur-Cèze (30) 31/03/2013'
+      expect(data).to.include 'Bagnols-Sur-Cèze 30/03/2013'
+      expect(data).to.include 'Bagnols-Sur-Cèze 31/03/2013'
       expect(data).to.include couples[0]
       expect(data).to.include couples[1]
       expect(data).to.include couples[2]
@@ -336,7 +333,7 @@ describe 'Palmares service tests', ->
       done()
 
   it 'should some competitions palmares be exported', (done) ->
-    service.exportCompetitions ['a281637604e1ac8ffd1eeb51e58e7adf', 'e3a7748ff934c9020e76fd9748220192'], (err, xlsx) ->
+    service.exportCompetitions ['a281637604e1ac8ffd1eeb51e58e7adf', 'ba26f16638b950fa938e423a34fc7305'], (err, xlsx) ->
       return done "failed to export competitions palmares: #{err}" if err?
       expect(xlsx).to.have.property 'creator', i18n.appTitle
       expect(xlsx).to.have.property 'lastModifiedBy', i18n.appTitle
@@ -347,8 +344,8 @@ describe 'Palmares service tests', ->
       data = JSON.stringify sheet.data, null, 2
       expect(data).to.include 'Bourg En Bresse 19/01/2013'
       expect(data).not.to.include 'Bourg En Bresse 02/03/2013'
-      expect(data).to.include 'Bagnols-Sur-Cèze (30) 30/03/2013'
-      expect(data).not.to.include 'Bagnols-Sur-Cèze (30) 31/03/2013'
+      expect(data).to.include 'Bagnols-Sur-Cèze 30/03/2013'
+      expect(data).not.to.include 'Bagnols-Sur-Cèze 31/03/2013'
       expect(data).to.include couples[0]
       expect(data).to.include couples[1]
       expect(data).not.to.include couples[2]
@@ -378,8 +375,8 @@ describe 'Palmares service tests', ->
       data = JSON.stringify sheet.data, null, 2
       expect(data).to.include 'Bourg En Bresse 19/01/2013'
       expect(data).to.include 'Bourg En Bresse 02/03/2013'
-      expect(data).not.to.include 'Bagnols-Sur-Cèze (30) 30/03/2013'
-      expect(data).to.include 'Bagnols-Sur-Cèze (30) 31/03/2013'
+      expect(data).not.to.include 'Bagnols-Sur-Cèze 30/03/2013'
+      expect(data).to.include 'Bagnols-Sur-Cèze 31/03/2013'
       expect(data).not.to.include couples[0]
       expect(data).to.include couples[1]
       expect(data).to.include couples[2]
@@ -403,8 +400,8 @@ describe 'Palmares service tests', ->
       return done "failed to get palmares: #{err}" if err?
       expect(results).to.have.length 2
       # then first competition is last added
-      expect(results[0].competition.id).to.equal '4ca82205bf98ae50dc4beede80be8370'
-      expect(results[0].competition.place).to.equal 'Bagnols-Sur-Cèze (30)'
+      expect(results[0].competition.id).to.equal 'da84f7326d92212d7cd5c58c89c6c6b6'
+      expect(results[0].competition.place).to.equal 'Bagnols-Sur-Cèze'
       expect(results[0].results).to.have.length 1
       expect(results[0].results[0].toJSON()).to.deep.equal  
         couple: couples[1]
@@ -434,10 +431,10 @@ describe 'Palmares service tests', ->
   
   it 'should competitions be removed', (done) ->
     expect(_.keys(service.competitions).sort()).to.deep.equal [
-      '4ca82205bf98ae50dc4beede80be8370'
       '670df6fb520ef609820ed2920828eb10'
       'a281637604e1ac8ffd1eeb51e58e7adf'
-      'e3a7748ff934c9020e76fd9748220192'
+      'ba26f16638b950fa938e423a34fc7305'
+      'da84f7326d92212d7cd5c58c89c6c6b6'
     ]
     service.remove ['unknown', '670df6fb520ef609820ed2920828eb10'], (err) =>
       return done "failed to remove competition: #{err}" if err?
@@ -445,9 +442,9 @@ describe 'Palmares service tests', ->
       storage.pop 'competitions', (err, value) ->
         return done "failed to read competitions in storage: #{err}" if err?
         expect(_.keys(value).sort()).to.deep.equal [
-          '4ca82205bf98ae50dc4beede80be8370'
           'a281637604e1ac8ffd1eeb51e58e7adf'
-          'e3a7748ff934c9020e76fd9748220192'
+          'ba26f16638b950fa938e423a34fc7305'
+          'da84f7326d92212d7cd5c58c89c6c6b6'
         ]
         # then couple storage does not contain competition anymore
         storage.pop 'tracked', (err, value) ->
@@ -466,8 +463,8 @@ describe 'Palmares service tests', ->
         expect(value).to.have.length 2
         expect(value[1].name).to.equal couples[0]
         expect(value[1].palmares).to.have.property 'a281637604e1ac8ffd1eeb51e58e7adf'
-        expect(value[1].palmares).to.have.property 'e3a7748ff934c9020e76fd9748220192'
-        expect(value[1].palmares).to.have.property '4ca82205bf98ae50dc4beede80be8370'
+        expect(value[1].palmares).to.have.property 'ba26f16638b950fa938e423a34fc7305'
+        expect(value[1].palmares).to.have.property 'da84f7326d92212d7cd5c58c89c6c6b6'
         expect(value[0].name).to.equal couples[2]
         expect(value[0].palmares).to.be.empty
         done()
@@ -481,8 +478,8 @@ describe 'Palmares service tests', ->
         expect(value).to.have.length 2
         expect(value[1].name).to.equal couples[0]
         expect(value[1].palmares).to.have.property 'a281637604e1ac8ffd1eeb51e58e7adf'
-        expect(value[1].palmares).to.have.property 'e3a7748ff934c9020e76fd9748220192'
-        expect(value[1].palmares).to.have.property '4ca82205bf98ae50dc4beede80be8370'
+        expect(value[1].palmares).to.have.property 'ba26f16638b950fa938e423a34fc7305'
+        expect(value[1].palmares).to.have.property 'da84f7326d92212d7cd5c58c89c6c6b6'
         expect(value[0].name).to.equal couples[2]
         expect(value[0].palmares).to.be.empty
         done()

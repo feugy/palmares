@@ -1,6 +1,8 @@
 'use strict'
 
 _ = require 'underscore'
+{safeLoad} = require 'js-yaml'
+{readFileSync} = require 'fs-extra'
 EventEmitter = require('events').EventEmitter
 util = require './util/common'
 FFDS = require './provider/ffds'
@@ -18,7 +20,7 @@ util = require './util/common'
 module.exports = class Router extends EventEmitter
 
   # i18n utility
-  i18n: require '../nls/common.yml'
+  i18n: safeLoad readFileSync "#{__dirname}/../nls/common.yml"
 
   # competitions provider
   providers: []

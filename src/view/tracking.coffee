@@ -1,6 +1,8 @@
 'use strict'
 
 _ = require 'underscore'
+{safeLoad} = require 'js-yaml'
+{readFileSync} = require 'fs-extra'
 View = require '../view/view'
 
 # validation regexp
@@ -12,7 +14,7 @@ module.exports = class HomeView extends View
   template: require '../../template/tracking.html'
 
   # i18n object for rendering
-  i18n: require '../../nls/common.yml'
+  i18n: safeLoad readFileSync "#{__dirname}/../../nls/common.yml"
 
   # selected couples
   couples: []

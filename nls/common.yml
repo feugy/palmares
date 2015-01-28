@@ -26,6 +26,7 @@ buttons:
 
 labels:
   proxy: "Proxy :"
+  season: "Saison récupérée :"
   noFilter: Tout
   filterNational: Compétitions nationnales
   filterInternational: Compétitions internationnales
@@ -68,6 +69,7 @@ msgs:
     <div class="%1$s">Analyse de <em>%2$s %3$s</em>: concours <span class="done">0</span>/<span class="total"></span>...</div>
   competitionAnalyzed: >
     <div>Compétition de <em>%1$s %2$s</em> analysée</div>
+    
   validCouple: le nom semble bon !
   foundInGroup: '%1$s couple(s) trouvé(s) !'
   searchInProgress: 'consultation en cours...'
@@ -105,6 +107,8 @@ errors:
     <div class="alert alert-warning">Ce couple n'a participé à aucune compétition connue</div>
   noContests: >
     <div class="alert alert-warning">Cette compétition ne contient aucun résultat</div>
+  competition: >
+    <div>Compétition de <em>%1$s %2$s</em> en échec : merci de réessayer ultérieurement</div>
 
 tips:
   exportAll: Export tous les résultats des couples suivis

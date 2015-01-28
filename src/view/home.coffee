@@ -2,6 +2,7 @@
 
 _ = require 'underscore'
 fs = require 'fs-extra'
+{safeLoad} = require 'js-yaml'
 {normalize} = require 'path'
 xlsx = require 'xlsx.js'
 View = require '../view/view'
@@ -36,7 +37,7 @@ module.exports = class HomeView extends View
   template: require '../../template/home.html'
 
   # i18n object for rendering
-  i18n: require '../../nls/common.yml'
+  i18n: safeLoad fs.readFileSync "#{__dirname}/../../nls/common.yml"
 
   # couple names that have fresh results
   newly: {}

@@ -1,6 +1,6 @@
 @import 'bootstrap-2.3.1-min.css'
-@import 'mixins'
-@import 'constants'
+@require 'mixins'
+@require 'constants'
 
 /***********************************************
  * Layout
@@ -513,7 +513,6 @@ input:not([type=button]):not([type=submit]):focus
  * About view
  */
 
-
 .about
   
   header
@@ -561,3 +560,12 @@ input:not([type=button]):not([type=submit]):focus
     margin-top 35px
     color primaryColor
     font-size 0.9em
+    
+/***********************************************
+ * Settings view
+ */
+ 
+.settings
+  
+  .season.error
+    background warningColor

@@ -14,23 +14,6 @@ util = require '../util/common'
 # Extract national competitions from the Ballroom Dancing National Federation
 module.exports = class WDSFProvider extends Provider
 
-  # Current year
-  currYear: null
-
-  # temporary array to store parsed competitions
-  models: []
-
-  # Provider constructor: initialize with configuration
-  # For mandatory options, @see Provider.constructor
-  #
-  # @param opts [Object] provider configuration. Must contains:
-  constructor: (opts) ->
-    super opts
-    now = moment()
-    @currYear = now.year()
-    # after mid august: removes one to the year
-    @currYear-- if now.month() <= 7 or now.month() is 7 and now.date() <= 14
-
   # Provide a custom sync method to extract competitions over the internet.
   # Only read operation is supported.
   #
@@ -48,14 +31,17 @@ module.exports = class WDSFProvider extends Provider
         err = new Error "failed to fetch results from '#{@opts.name}': #{res.statusCode}\n#{body}"
       return callback err if err?
       # parse csv content
-      @models = []
-      csv()
-        .from(body.toString())
-        .on('record', @_extractHeader)
-        .on('end', =>
-          callback null, _.sortBy @models, 'date'
+      competitions = []
+      parser = csv.parse()
+      parser.on('readable', =>
+          @_extractHeader record, competitions while record = parser.read()
+        )
+        .on('finish', =>
+          callback null, _.sortBy competitions, 'date'
         )
         .on 'error', callback
+      parser.write body.toString()
+      parser.end()
 
   # @see Provider.getDetails()
   getDetails: (competition, callback) =>
@@ -71,27 +57,29 @@ module.exports = class WDSFProvider extends Provider
           err = new Error "failed to fetch contests from '#{@opts.name} #{competition.place}': #{res.statusCode}\n#{body}"
         return next err if err?
         # extract contests ranking ids
-        $ = cheerio.load util.replaceUnallowed body.toString()
+        $ = cheerio.load util.replaceUnallowed(body.toString()), decodeEntities: false
         # find competition list for the competition date only
         for day, i in $ '.competitionList > h3' when competition.date.isSame $(day).text()
           urls = urls.concat ("#{@opts.url}#{$(link).attr 'href'}" for link in $ ".competitionList table:nth-of-type(#{i+1}) a" when $(link).text() isnt 'Upcoming')
         next()
     , (err) =>
+      return callback err if err?
       # no contests yet
       return callback null unless urls.length
       competition.contests = []
       @emit 'progress', 'contestsRetrieved', competition: competition, total: urls.length
       # get all contests rankings
-      return async.eachSeries urls, (url, next) =>
+      async.eachSeries urls, (url, next) =>
         @_extractRanking competition, url, next
       , callback
 
   # **private**
   # Extract a competition header (place, date, url) from incoming Csv
-  # Enrich the current `models` array with a new competition if not already existing
+  # Enrich the competitions array with a new competition if not already existing
   #
   # @param record [Object] object extracted from a Csv line
-  _extractHeader: (record) =>
+  # @param competitions [Array<Competition>] extracted competitions, enriched by this method
+  _extractHeader: (record, competitions) =>
     # ignore header
     return if record[0] is 'Date'
 
@@ -109,10 +97,10 @@ module.exports = class WDSFProvider extends Provider
     data.id = md5 "#{_.slugify data.place}#{data.date.format 'YYYYMMDD'}"
     
     # search for existing competition with same url
-    existing = _.findWhere @models, id: data.id
+    existing = _.findWhere competitions, id: data.id
     unless existing?
       # do not add twice the same competition
-      @models.push new Competition data 
+      competitions.push new Competition data 
     else unless data.url in existing.dataUrls
       # Merge urls if needed
       existing.dataUrls.push data.url
@@ -126,7 +114,12 @@ module.exports = class WDSFProvider extends Provider
   # @param callback [Function] end callback, invoked with arguments:
   # @option callback err [String] an error object or null if no error occured
   _extractRanking: (competition, url, callback) =>
-    url = "#{url}/Ranking" unless _.endsWith url, "/Ranking"
+    if _.endsWith url, '/Participants'
+      # only participants list ? means that results are not available...
+      @emit 'progress', 'contestEnd', competition: competition, done: competition.contests.length
+      return callback null
+
+    url = "#{url}/Ranking" unless _.endsWith url, '/Ranking'
     request
       url: url
       proxy: util.confKey 'proxy', ''
@@ -140,7 +133,7 @@ module.exports = class WDSFProvider extends Provider
       body = body.toString()
       if -1 is body.indexOf 'Cancelled'
         # extract ranking
-        $ = cheerio.load util.replaceUnallowed body
+        $ = cheerio.load util.replaceUnallowed(body), decodeEntities: false
         results = 
           # competition's title
           title: $('h1').first().text().replace 'Ranking of ', ''

@@ -2,6 +2,7 @@
 
 _ = require 'underscore'
 express = require 'express'
+methodOverride = require 'method-override'
 moment = require 'moment'
 http = require 'http'
 fs = require 'fs-extra'
@@ -20,8 +21,7 @@ describe 'FFDS provider tests', ->
   before (done) ->
     # creates a fake server
     app = express()
-    app.use express.methodOverride()
-    app.use app.router
+    app.use methodOverride()
     app.get '/compet-situation.php', (req, res, next) ->
       res.charset = 'iso-8859-1'
       res.type 'html'
@@ -61,6 +61,12 @@ describe 'FFDS provider tests', ->
             when 'Coms-N-PBMC-F-S' then file = '1248-J-F-Std.html'
             when 'Open-N-PBMC-CDE-L' then file = '1248-J-O-Lat.html'
             when 'Open-N-PBMC-CDE-S' then file = '1248-J-O-Std.html'
+        when '1423'
+          file = '1423-details.html'
+          file = '1423-A-C-Lat.html' if req.query.Compet?
+        when '1424'
+          file = '1424-details.html'
+          file = '1424-A-O-Lat.html' if req.query.Compet?
 
       fs.readFile join('test', 'fixtures', file), (err, content) ->
         return res.send 404, err if err?
@@ -79,8 +85,6 @@ describe 'FFDS provider tests', ->
           couples: 'compet-situation.php?club_id=%1s&Recherche_Club='
           search: 'compet-situation.php?couple_name=%1$s&Recherche_Nom='
           dateFormat: 'DD/MM/YYYY'
-      # mock year to match test files
-      #service.currYear = 2012
       done()
 
   after (done) -> server?.close done
@@ -89,13 +93,13 @@ describe 'FFDS provider tests', ->
     service.listResults (err, results) ->
       return done "failed to get result list: #{err}" if err?
 
-      expect(results).to.have.length 26
+      expect(results).to.have.length 27
       expect(results[25].place).to.equal 'Marseille'
       expect(results[25].id).to.equal '21f4eb195bc7de2678b1fb8665d79a28'
       expect(results[25].toJSON().date).to.deep.equal moment('2013-03-23').toDate()
     
-      expect(results[21].place).to.equal 'Illzach (mulhouse)'
-      expect(results[21].id).to.equal '200e916279fd5ba0f52e61b71b4b2b43'
+      expect(results[21].place).to.equal 'Illzach'
+      expect(results[21].id).to.equal '45ca729adf5a8b963b73bbd6197d3a32'
       expect(results[21].toJSON().date).to.deep.equal moment('2013-02-17').toDate()
 
       expect(results[18].place).to.equal 'Vénissieux'
@@ -108,11 +112,31 @@ describe 'FFDS provider tests', ->
 
       done()
 
+  it 'should multiple competition on same day and same place be merged', (done) ->
+    @timeout 5e3
+    service.listResults (err, results) ->
+      return done "failed to get result list: #{err}" if err?
+
+      expect(results).to.have.length 27
+      competition = results[26]
+      expect(competition.place).to.equal 'Lillebonne'
+      expect(competition.id).to.equal '1e42c28c5d99ad5f86d4ae2cfc74c848'
+      expect(competition.toJSON().date).to.deep.equal moment('2013-08-13').toDate()
+      expect(competition.dataUrls).to.deep.equal [
+        "http://127.0.0.1:#{port}/compet-resultats.php?NumManif=1423"
+        "http://127.0.0.1:#{port}/compet-resultats.php?NumManif=1424"
+      ]
+
+      service.getDetails competition, (err) ->
+        return done "failed to get competition details: #{err}" if err?
+        expect(competition).to.have.property('contests').that.has.lengthOf 54
+        done()
+
   it 'should simple competition contest list be retrieved', (done) ->
 
     competition = new Competition 
-      id: '200e916279fd5ba0f52e61b71b4b2b43'
-      place: 'Illzach (mulhouse)'
+      id: '45ca729adf5a8b963b73bbd6197d3a32'
+      place: 'Illzach'
       date: moment '2013-02-17'
       url: "http://127.0.0.1:#{port}/compet-resultats.php?NumManif=1313"
 

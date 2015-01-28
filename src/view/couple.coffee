@@ -1,6 +1,8 @@
 'use strict'
 
 _ = require 'underscore'
+{safeLoad} = require 'js-yaml'
+{readFileSync} = require 'fs-extra'
 View = require '../view/view'
 util = require '../util/ui'
 
@@ -10,7 +12,7 @@ module.exports = class CoupleView extends View
   template: require '../../template/couple.html'
 
   # i18n object for rendering
-  i18n: require '../../nls/common.yml'
+  i18n: safeLoad readFileSync "#{__dirname}/../../nls/common.yml"
 
   # Rendered couple name
   name: null

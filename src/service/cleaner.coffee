@@ -1,6 +1,6 @@
 'use strict'
 
-fs = require 'fs'
+fs = require 'fs-extra'
 
 # Data sanitizer
 module.exports = class Cleaner

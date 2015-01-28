@@ -60,11 +60,23 @@ cleanNames = (names) ->
 cleanContest = (original) ->
   original.replace('Compétition à points', '').replace('Compétition sans points', '').trim()
 
+# Check if a date is first half of the year (before august 14th, included)
+#
+# @param date [Moment] checked date
+# @return true if this date is before august 14th, included, false otherwise
+isFirstHalf = (date) ->
+  date?.month() < 7 or date?.month() is 7 and date?.date() <= 14
+
+# Check if a given year match current season, or is archive
+#
+# @param year [Number] current season year, always smaller (one from september)
+# @param date [Moment] checked date
+# @return true if date is current year and in second half, or if date is next year and first half
+isWithinSeason = (year, date) ->
+  (year is date?.year() and not isFirstHalf date) or (year+1 is date?.year() and isFirstHalf date)
+
 # Extract national competitions from the Ballroom Dancing National Federation
 module.exports = class FFDSProvider extends Provider
-
-  # Current year
-  currYear: null
 
   # Club list, to avoid asking too many time them
   clubs: null
@@ -79,10 +91,6 @@ module.exports = class FFDSProvider extends Provider
   # @option opts search [String] url to search for couples
   constructor: (opts) ->
     super opts
-    now = moment()
-    @currYear = now.year()
-    # after mid august: removes one to the year
-    @currYear-- if now.month() < 7 or now.month() is 7 and now.date() <= 14
     throw new Error "missing 'clubs' property in provider configuration" unless _.has @opts, 'clubs'
     throw new Error "missing 'couples' property in provider configuration" unless _.has @opts, 'couples'
     throw new Error "missing 'details' property in provider configuration" unless _.has @opts, 'details'
@@ -91,52 +99,53 @@ module.exports = class FFDSProvider extends Provider
 
   # @see Provider.listResults()
   listResults: (callback = ->) =>
+    url = "#{@opts.url}/#{@opts.list}#{if isWithinSeason @currYear, moment() then '' else '?Archives'}"
     # performs itself the request
     request
       # to avoid encoding problems
       encoding: 'binary'
-      url: "#{@opts.url}/#{@opts.list}"
+      url: url
       proxy: util.confKey 'proxy', ''
     , (err, res, body) =>
       if !(err?) and res?.statusCode isnt 200
         err = new Error "failed to fetch results from '#{@opts.name}': #{res.statusCode}\n#{body}"
       return callback err if err?
       # extract competiton headers for each lines
-      $ = cheerio.load util.replaceUnallowed body.toString()
+      $ = cheerio.load util.replaceUnallowed(body.toString()), decodeEntities: false
       competitions = []
 
       for line in $ 'table#tosort > tbody > tr'
-        competition = @_extractHeader $(line)
-        date = competition?.date
-        # only keep competition in current year after mid august, or next year before mid august
-        if (date?.year() is @currYear and (date?.month() > 7 or date?.month() is 7 and date?.date() > 14)) or
-            (date?.year() is @currYear+1 and (date?.month() < 7 or date?.month() is 7 and date?.date() <= 14))
-          competitions.push competition
+        @_extractHeader $(line), competitions
       return callback null, _.sortBy competitions, 'date'
 
   # @see Provider.getDetails()
   getDetails: (competition, callback) =>
-    return callback new Error "No details url in competition '#{@opts.name} #{competition.place}'" unless competition.url?
-    # request contests list
-    request
-      # to avoid encoding problems
-      encoding: 'binary'
-      url: competition.url
-      proxy: util.confKey 'proxy', ''
-    , (err, res, body) =>
-      if !(err?) and res?.statusCode isnt 200
-        err = new Error "failed to fetch contests from '#{@opts.name} #{competition.place}': #{res.statusCode}\n#{body}"
-      return callback err if err?
+    return callback new Error "No details url in competition '#{@opts.name} #{competition.place}'" unless competition.dataUrls?.length > 0
+    urls = []
+    # request contests list, for each known urls
+    async.eachSeries competition.dataUrls, (url, next) =>
+      request
+        # to avoid encoding problems
+        encoding: 'binary'
+        url: url
+        proxy: util.confKey 'proxy', ''
+      , (err, res, body) =>
+        if !(err?) and res?.statusCode isnt 200
+          err = new Error "failed to fetch contests from '#{@opts.name} #{competition.place}': #{res.statusCode}\n#{body}"
+        return next err if err?
 
-      # extract contests ranking ids
-      $ = cheerio.load util.replaceUnallowed body.toString()
-      urls = ("#{@opts.url}/#{$(link).attr 'href'}" for link in $ 'td > a')
-      competition.contests = []
+        # extract contests ranking ids
+        $ = cheerio.load util.replaceUnallowed(body.toString()), decodeEntities: false
+        urls = urls.concat ("#{@opts.url}/#{$(link).attr 'href'}" for link in $ 'td > a')
+        next()
+    , (err) =>
+      return callback err if err?
       # no contests yet
       return callback null unless urls.length
+      competition.contests = []
       @emit 'progress', 'contestsRetrieved', competition: competition, total: urls.length
       # get all contests rankings
-      return async.eachSeries urls, (url, next) =>
+      async.eachSeries urls, (url, next) =>
         @_extractRanking competition, url, next
       , callback
 
@@ -163,7 +172,7 @@ module.exports = class FFDSProvider extends Provider
         err = new Error "failed to fetch club list from '#{@opts.name}': #{res.statusCode}\n#{body}"
       return callback err if err?
       # extract club ids and names and store it in memory
-      $ = cheerio.load util.replaceUnallowed body.toString()
+      $ = cheerio.load util.replaceUnallowed(body.toString()), decodeEntities: false
       @clubs = (id: $(club).attr('value'), name: $(club).text().trim() for club in $ '[name=club_id] option')
       search()
 
@@ -215,7 +224,7 @@ module.exports = class FFDSProvider extends Provider
   # @options callback couples [array] list of strings containing the couple names (may be empty). 
   _extractNames: (body, callback) =>
     couples = []
-    $ = cheerio.load util.replaceUnallowed body.toString()
+    $ = cheerio.load util.replaceUnallowed(body.toString()), decodeEntities: false
     for couple in $ '#tosort tbody tr'
       couple = $(couple)
       # ignore inactive couples
@@ -229,10 +238,12 @@ module.exports = class FFDSProvider extends Provider
 
   # **private**
   # Extract a competition header (place, date, url) from incoming Html
+  # Ignore competitions whose date is not in current season
+  # If multiple competitions are found at the same date and place, enrich existing competition to ensure uniquness
   #
   # @param line [Object] cheerio object of incoming Html
-  # @return the corresponding Competition raw attributes, that may be null in case of extraction failure
-  _extractHeader: (line) =>
+  # @param competitions [Array<Competition>] extracted competitions, enriched by this method
+  _extractHeader: (line, competitions) =>
     # extract id to consult details
     id = line.find('td:last-child a')?.attr('href')?.match(/NumManif=(\d+)$/)?[1]
     return null unless id?
@@ -245,7 +256,16 @@ module.exports = class FFDSProvider extends Provider
     data.place = data.place.replace(/\(\s*\w+\s*\)/, '').trim()
     # id is date append to place lowercased without non-word characters.
     data.id = md5 "#{_.slugify data.place}#{data.date.format 'YYYYMMDD'}"
-    new Competition data
+    # only keep competition in current year after mid august, or next year before mid august
+    return unless isWithinSeason @currYear, data.date
+    # search for existing competition with same url
+    existing = _.findWhere competitions, id: data.id
+    unless existing?
+      # do not add twice the same competition
+      competitions.push new Competition data 
+    else unless data.url in existing.dataUrls
+      # Merge urls if needed
+      existing.dataUrls.push data.url
 
   # **private**
   # Extract a competition's contest ranking from contest's id.
@@ -271,7 +291,7 @@ module.exports = class FFDSProvider extends Provider
       # remove errored divs 
       body = body.replace /<\/div><\/th>/g, '</th>'
       # extract ranking
-      $ = cheerio.load body
+      $ = cheerio.load body, decodeEntities: false 
       results = {}
       title = cleanContest $('h3').text()
       # for each heat (first is final)

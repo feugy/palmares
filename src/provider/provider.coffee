@@ -1,12 +1,15 @@
 'use strict'
 
 # to use _.string also
-require '../util/common' 
 _ = require 'underscore'
+util = require '../util/common'
 {EventEmitter} = require 'events'
 
 # Abstract class for providers
 module.exports = class Provider extends EventEmitter
+
+  # Current year
+  currYear: null
 
   # Provider configuration options. @see constructor
   opts = {}
@@ -26,6 +29,9 @@ module.exports = class Provider extends EventEmitter
     throw new Error "missing 'url' property in #{@opts.name} configuration" unless _.has @opts, 'url'
     throw new Error "missing 'list' property in #{@opts.name} configuration" unless _.has @opts, 'list'
     throw new Error "missing 'dateFormat' property in #{@opts.name} configuration" unless _.has @opts, 'dateFormat'
+    @currYear = util.confKey 'year'
+    # reload year if needed
+    util.on 'confChanged', => @currYear = util.confKey 'year'
 
   # Provide a custom sync method to extract competitions over the internet.
   # Only read operation is supported.

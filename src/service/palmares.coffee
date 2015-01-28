@@ -124,7 +124,6 @@ module.exports = class PalmaresService extends EventEmitter
         console.error "failed to add new tracked couples: #{err}" if err?
         callback null, results
 
-
     @emit 'progress', 'start'
     inProgress = true
     # reuse stored competitions if possible
@@ -147,11 +146,15 @@ module.exports = class PalmaresService extends EventEmitter
         async.eachLimit competitions, @limit, (competition, next) =>
           @emit 'progress', 'compStart', competition
           provider.getDetails competition, (err) =>
-            return next err if err?
-            # add competition for further reuse and analyze it
-            @competitions[competition.id] = competition
-            @_analyze couples, competition, results
-            @emit 'progress', 'compEnd', competition
+            if err?
+              # do not add failing competition
+              console.error err
+              @emit 'progress', 'compFailed', competition, err
+            else
+              # add competition for further reuse and analyze it
+              @competitions[competition.id] = competition
+              @_analyze couples, competition, results
+              @emit 'progress', 'compEnd', competition
             next()
         , next
     , (err) =>
@@ -196,9 +199,11 @@ module.exports = class PalmaresService extends EventEmitter
             if err?
               # remove failing competition now, to be retrieved later
               console.error err
-              newCompetitions.splice newCompetitions.indexOf competition, 1
-            # keep competition
-            @_analyze @tracked, competition, results unless err?
+              newCompetitions.splice newCompetitions.indexOf(competition), 1
+              @emit 'progress', 'compFailed', competition, err
+            else
+              # keep competition
+              @_analyze @tracked, competition, results 
             @emit 'progress', 'compEnd', competition
             next2()
         , next

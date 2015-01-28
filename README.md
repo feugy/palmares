@@ -28,16 +28,32 @@ So, all sources are under `src` folder, and are compiled into `lib` folder, afte
 1. install [NodeJS](http://nodejs.org/download/) if not already the case.
 2. clone this repository: `git clone https://github.com/feugy/palmares`
 3. enter the palmares folder with your shell.
-4. globally install Coffeescript: `npm install -g coffee-script@1.6.2`
-5. intsall palmares dependencies: `npm install`
+4. globally install gulp: `npm install -g gulp`
+5. install palmares dependencies: `npm install`
 6. download [node-webkit binaries](https://github.com/rogerwang/node-webkit) into a `bin` folder
-7. launch your app from shell: `cake start`
+7. launch your app from shell: `npm start`
 
-If you change stuff under src, don't forget to compile before launching the application with the shell command `cake build`
+If you change stuff under src, don't forget to compile before launching the application with the shell command `gulp build`
 
-To build the windows installer, download [NSIS](http://nsis.sourceforge.net/Main_Page), and compile the `installer/installer.nsi` with it.
+To build the windows installer, download [NSIS](http://nsis.sourceforge.net/Main_Page) and [Access control plugin](http://nsis.sourceforge.net/AccessControl_plug-in), and compile the `installer/installer.nsi` with it (don't forget to run `npm prune --production` before to lighten installation package)
 
 # Release notes
+
+v1.7.0
+
+  - fix WDSF new format
+  - fix FFDS multiple results files for a same place and date (allow multiple urls per competition)
+  - allow FFDS to get archived competitions
+  - allow year to be configurable from UI
+  - handle and display retrieval errors
+  - update dependencies to last version
+  - replace cakefile per gulp
+
+v1.6.1
+
+  - fix error handling that prevent all competitions to be retrieved when at least one fails
+  - upgrade all dependencies to latest version
+  - replace cake buildsystem per gulp to reuse watch
 
 v1.6.0
 
@@ -47,7 +63,7 @@ v1.6.0
   - removes an unnecessary cleaner invokation
   - allow competition to fail during update
   - removes debug logs
-  - erase exsiting data with included values (CVDS) 
+  - erase existing data with included values (CVDS) 
 
 v1.5.0
 

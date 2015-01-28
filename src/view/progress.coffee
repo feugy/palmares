@@ -3,6 +3,8 @@
 _ = require 'underscore'
 moment = require 'moment'
 View = require '../view/view'
+{safeLoad} = require 'js-yaml'
+{readFileSync} = require 'fs-extra'
 
 animDuration = 300
 rankingDelay = 5000
@@ -13,7 +15,7 @@ module.exports = class ProgressView extends View
   template: require '../../template/progress.html'
 
   # i18n object for rendering
-  i18n: require '../../nls/common.yml'
+  i18n: safeLoad readFileSync "#{__dirname}/../../nls/common.yml"
 
   # while tracking, the number of competitions to analyze
   totalComps: null
@@ -52,7 +54,11 @@ module.exports = class ProgressView extends View
 
   # Tracking progress handler
   # Display tracking progression while events are comming
-  _onProgress: (state, details) =>
+  #
+  # @param state [String] current state message
+  # @param details [Object] state dependant details (may be competition)
+  # @param err [Error] optional error
+  _onProgress: (state, details, err) =>
     unless @started
       @started = true
       @progress.css width: 0
@@ -85,10 +91,14 @@ module.exports = class ProgressView extends View
         console.log "analyzed #{details.done} contests in #{details.competition.place}"
         @details.find(".#{details.competition.id} .done").html details.done
       when 'compEnd'
-        console.log "analyse of #{details.place} ends"
+        console.log "analyze of #{details.place} ends"
         @currentComp++
         @progress.css width: "#{@currentComp*100/@totalComps}%"
         @details.find(".#{details.id}").replaceWith _.sprintf @i18n.msgs.competitionAnalyzed, details.place, details.date.format @i18n.dateFormat
+      when 'compFailed'
+        console.log "analyze of #{details.place} #{details.date.format @i18n.dateFormat} failed on #{err}"
+        # display err and remove class to prevent compEnd event from erasing error message
+        @details.find(".#{details.id}").removeClass(details.id).replaceWith _.sprintf @i18n.errors.competition, details.place, details.date.format @i18n.dateFormat
       when 'end'
         console.log "tracking ends !"
         @progress.css width: '100%'

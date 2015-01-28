@@ -1,8 +1,12 @@
 !include MUI2.nsh
 
+!system "readVersion.exe"
+!include "Version.txt"
+
 ; generated file
-outFile "Palmares-installer.exe"
-  
+Name "Palmarès - v${Version}"
+outFile "Palmares-installer-${Version}.exe"
+
 ; install in program files
 installDir $PROGRAMFILES\Palmares
 
@@ -41,6 +45,8 @@ section
 
   setOutPath $LOCALAPPDATA\palmares
   file /r ..\conf
+  ; grant permission for writing
+  AccessControl::GrantOnFile "$LOCALAPPDATA\palmares\conf" "(BU)" "GenericRead + GenericWrite"
 
   ; creates a shortcut within installation folder and on desktop
   createShortCut "$INSTDIR\Palmares.lnk" "$INSTDIR\bin\nw.exe" '"$INSTDIR"' "$INSTDIR\style\ribas-icon.ico"
@@ -49,8 +55,7 @@ section
   ; populate indexedDB
   !define APP_DATA $LOCALAPPDATA\palmares\IndexedDB\file__0.indexeddb.leveldb
   ; upgrade case: replace existing data
-  ; TODO unquote to replace. Use with caution ! 
-  rmdir /r ${APP_DATA}
+  ; TODO unquote to replace. Use with caution ! rmdir /r ${APP_DATA}
   
   IfFileExists ${APP_DATA}\*.* noop loadData
 
@@ -95,4 +100,3 @@ sectionEnd
 !define MUI_TEXT_WELCOME_INFO_TITLE "Bienvenue dans l'installation de l'application $(^NameDA)."
 !define MUI_TEXT_WELCOME_INFO_TEXT "Vous êtes sur le point d'installer $(^NameDA) sur votre ordinateur.$\r$\n$\r$\n$_CLICK"
 !insertmacro MUI_LANGUAGE ${LANG_FRENCH}
-Name "Palmarès"

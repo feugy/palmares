@@ -1,7 +1,8 @@
 'use strict'
 
-yaml = require 'js-yaml'
+{safeDump, safeLoad} = require 'js-yaml'
 fs = require 'fs-extra'
+moment = require 'moment'
 {resolve, join} = require 'path'
 _ = require 'underscore'
 EventEmitter = require('events').EventEmitter
@@ -23,7 +24,7 @@ else
 
 parseConf = ->
   try 
-    conf = yaml.load fs.readFileSync confPath, 'utf-8'
+    conf = safeLoad fs.readFileSync confPath, 'utf-8'
   catch err
     throw new Error "Cannot read or parse configuration file '#{confPath}': #{err}"
 parseConf()
@@ -31,6 +32,7 @@ parseConf()
 # read again if file is changed
 fs.watch confPath, ->
   parseConf()
+  console.log 'configuration changed !'
   emitter.emit 'confChanged'
 
 # This method is intended to replace the broken typeof() Javascript operator.
@@ -111,7 +113,7 @@ emitter.saveKey = (key, value) ->
 
   # synchronously save configuration
   try 
-    fs.writeFileSync confPath, yaml.safeDump(conf), 'utf-8'
+    fs.writeFileSync confPath, safeDump(conf), 'utf-8'
   catch err
     throw new Error "Cannot write configuration file '#{confPath}': #{err}"
 
