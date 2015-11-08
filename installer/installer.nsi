@@ -56,7 +56,7 @@ section
   !define APP_DATA $LOCALAPPDATA\palmares\IndexedDB\file__0.indexeddb.leveldb
   ; upgrade case: replace existing data
   ; TODO unquote to replace. Use with caution ! rmdir /r ${APP_DATA}
-  
+
   IfFileExists ${APP_DATA}\*.* noop loadData
 
   loadData:
@@ -78,7 +78,7 @@ sectionEnd
 
 ; Uninstall section
 section "Uninstall"
- 
+
   ; Always delete uninstaller first
   delete $INSTDIR\uninstall.exe
   delete $INSTDIR\package.json
@@ -93,7 +93,7 @@ section "Uninstall"
   rmdir /r $LOCALAPPDATA\palmares\conf
   delete $INSTDIR\Palmares.lnk
   delete $DESKTOP\Palmares.lnk
- 
+
 sectionEnd
 
 ; language labels

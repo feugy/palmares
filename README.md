@@ -37,7 +37,20 @@ If you change stuff under src, don't forget to compile before launching the appl
 
 To build the windows installer, download [NSIS](http://nsis.sourceforge.net/Main_Page) and [Access control plugin](http://nsis.sourceforge.net/AccessControl_plug-in), and compile the `installer/installer.nsi` with it (don't forget to run `npm prune --production` before to lighten installation package)
 
+# TODO / TOFIX
+
+- Competition list pagination for better performance
+- Competition export in XLSX is broken
+- nw.io with from 0.12.0 crash because too many data handled (no uncaught exception)
+
 # Release notes
+
+v1.8.0
+
+  - fix apostrophe in WDSF competition names
+  - update dependencies to latest version
+  - use nw-builder for OSX packaging
+  - remove moment warning on date parsing
 
 v1.7.0
 
@@ -63,7 +76,7 @@ v1.6.0
   - removes an unnecessary cleaner invokation
   - allow competition to fail during update
   - removes debug logs
-  - erase existing data with included values (CVDS) 
+  - erase existing data with included values (CVDS)
 
 v1.5.0
 
@@ -72,7 +85,7 @@ v1.5.0
   - bump underscore.string: names are properly capitalized
   - bump other libraries
   - enhance WDSF provider: detect competition of the same place and similar date
-  - enhance providers: remove parenthesis in title, 
+  - enhance providers: remove parenthesis in title,
   - enhance error reporting, especially while retrieving
   - link on data source from competition view
   - support 'ten' as result kind, in addition to 'lat' and 'std'
@@ -82,19 +95,19 @@ v1.5.0
 
 v1.4.2
 
-  - fix WDSF provider to adapt to ranking list new format 
+  - fix WDSF provider to adapt to ranking list new format
 
 v1.4.1
 
   - fix WDSF provider to automatically use the proper year range when getting competition list
 
 v1.4.0
-  
+
   - take in account international dance sport pages change that prevent result extraction
   - use new french dance sport website
 
 v1.3.0
-  
+
   - allow export all competitions of a given couple
   - fix proxy settings that were not saved
 
@@ -112,7 +125,7 @@ v1.1.0
   - upgrade to node-webkit 0.5.2
 
 v1.0.0
-  
+
   - first working release !
   - list track couples
   - list existing competitions

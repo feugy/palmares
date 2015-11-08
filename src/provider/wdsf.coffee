@@ -1,11 +1,11 @@
 'use strict'
-  
+
 _ = require 'underscore'
 async = require 'async'
 request = require 'request'
 moment = require 'moment'
 csv = require 'csv'
-md5 = require('md5').digest_s
+md5 = require 'md5'
 cheerio = require 'cheerio'
 Provider = require './provider'
 Competition = require '../model/competition'
@@ -57,9 +57,9 @@ module.exports = class WDSFProvider extends Provider
           err = new Error "failed to fetch contests from '#{@opts.name} #{competition.place}': #{res.statusCode}\n#{body}"
         return next err if err?
         # extract contests ranking ids
-        $ = cheerio.load util.replaceUnallowed(body.toString()), decodeEntities: false
+        $ = cheerio.load util.replaceUnallowed(body.toString()), decodeEntities: true
         # find competition list for the competition date only
-        for day, i in $ '.competitionList > h3' when competition.date.isSame $(day).text()
+        for day, i in $ '.competitionList > h3' when competition.date.isSame moment $(day).text(), 'D MMMM YYYY'
           urls = urls.concat ("#{@opts.url}#{$(link).attr 'href'}" for link in $ ".competitionList table:nth-of-type(#{i+1}) a" when $(link).text() isnt 'Upcoming')
         next()
     , (err) =>
@@ -83,7 +83,7 @@ module.exports = class WDSFProvider extends Provider
     # ignore header
     return if record[0] is 'Date'
 
-    data = 
+    data =
       # place is city (rank 3)
       place: _.titleize util.removeAccents record[2].trim()
       # date at first rank
@@ -95,12 +95,12 @@ module.exports = class WDSFProvider extends Provider
     data.place = data.place.replace(/\(\s*\w+\s*\)/, '').trim()
     # id is date append to place lowercased without non-word characters.
     data.id = md5 "#{_.slugify data.place}#{data.date.format 'YYYYMMDD'}"
-    
+
     # search for existing competition with same url
     existing = _.findWhere competitions, id: data.id
     unless existing?
       # do not add twice the same competition
-      competitions.push new Competition data 
+      competitions.push new Competition data
     else unless data.url in existing.dataUrls
       # Merge urls if needed
       existing.dataUrls.push data.url
@@ -131,10 +131,10 @@ module.exports = class WDSFProvider extends Provider
 
       # Unless contest was cancelled...
       body = body.toString()
-      if -1 is body.indexOf 'Cancelled'
+      if @_hasResults body
         # extract ranking
         $ = cheerio.load util.replaceUnallowed(body), decodeEntities: false
-        results = 
+        results =
           # competition's title
           title: $('h1').first().text().replace 'Ranking of ', ''
           results: {}
@@ -152,6 +152,16 @@ module.exports = class WDSFProvider extends Provider
               rank = $(row).find('td:nth-child(1)').text()
               results.results[_.titleize util.removeAccents name] = parseInt rank
           competition.contests.push results
+      else
+        err = new Error "results not ready for '#{@opts.name} #{competition.place}'"
 
       @emit 'progress', 'contestEnd', competition: competition, done: competition.contests.length
-      callback null
+      callback err or null
+
+  # **private**
+  # Tells if a competition contest contains rankings or not.
+  #
+  # @param body [String] html response text
+  # @return [Boolean] true if rankings are availables
+  _hasResults: (body) =>
+    -1 is body.indexOf('Cancelled') and -1 is body.indexOf 'Not ranked yet'

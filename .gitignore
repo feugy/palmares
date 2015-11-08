@@ -5,3 +5,4 @@ node_modules
 error.txt
 .sublime-gulp*
 sublime-gulp*
+cache

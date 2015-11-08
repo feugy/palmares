@@ -6,8 +6,8 @@ moment = require 'moment'
 {resolve, join} = require 'path'
 _ = require 'underscore'
 EventEmitter = require('events').EventEmitter
-_.str = require 'underscore.string'
-_.mixin _.str.exports()
+_.mixin require('underscore.string').exports()
+
 env = process.env.NODE_ENV?.trim()?.toLowerCase() or 'dev'
 
 # use an event emitter to propagate configuration changes
@@ -23,7 +23,7 @@ else
   confPath = join gui.App.dataPath, 'conf', "#{env}-conf.yml"
 
 parseConf = ->
-  try 
+  try
     conf = safeLoad fs.readFileSync confPath, 'utf-8'
   catch err
     throw new Error "Cannot read or parse configuration file '#{confPath}': #{err}"
@@ -44,7 +44,7 @@ fs.watch confPath, ->
 # @see http://bonsaiden.github.com/JavaScript-Garden/#types.typeof
 emitter.type = (obj) -> Object::toString.call(obj).slice(8, -1)?.toLowerCase() or 'undefined'
 
-# isA() is an utility method that check if an object belongs to a certain class, or to one 
+# isA() is an utility method that check if an object belongs to a certain class, or to one
 # of it's subclasses. Uses the classes names to performs the test.
 #
 # @param obj [Object] the object which is tested
@@ -61,15 +61,15 @@ emitter.isA = (obj, clazz) ->
 # Read a configuration key inside the YAML configuration file (utf-8 encoded).
 # At first call, performs a synchronous disk access, because configuration is very likely to be read
 # before any other operation. The configuration is then cached.
-# 
-# The configuration file read is named 'xxx-conf.yaml', where xxx is the value of NODE_ENV (dev if not defined) 
+#
+# The configuration file read is named 'xxx-conf.yaml', where xxx is the value of NODE_ENV (dev if not defined)
 # and located in a "conf" folder under the execution root.
 #
 # @param key [String] the path to the requested key, splited with dots.
-# @param def [Object] the default value, used if key not present. 
+# @param def [Object] the default value, used if key not present.
 # If undefined, and if the key is missing, an error is thrown.
 # @return the expected key.
-emitter.confKey = (key, def) -> 
+emitter.confKey = (key, def) ->
   path = key.split '.'
   obj = conf
   last = path.length-1
@@ -81,13 +81,13 @@ emitter.confKey = (key, def) ->
     unless i is last
       # goes deeper
       obj = obj[step]
-    else 
+    else
       # last step: returns value
       return obj[step]
 
 # Save a configuration key inside the YAML configuration file (utf-8 encoded).
 # Performs a synchronous disk access, because configuration changes are very likely to be blockant for the rest of the execution.
-# 
+#
 # A `confChanged` event is triggered
 #
 # @param key [String] the path to the requested key, splited with dots.
@@ -100,7 +100,7 @@ emitter.saveKey = (key, value) ->
   for step, i in path
     # add missing objects
     obj[step] = {} unless step of obj or i is last
-      
+
     if i is last
       # last step: set value
       if value is undefined
@@ -112,7 +112,7 @@ emitter.saveKey = (key, value) ->
       obj = obj[step]
 
   # synchronously save configuration
-  try 
+  try
     fs.writeFileSync confPath, safeDump(conf), 'utf-8'
   catch err
     throw new Error "Cannot write configuration file '#{confPath}': #{err}"
@@ -134,7 +134,7 @@ emitter.removeAccents = (str) ->
     # 240: ð, 271: ď, 273: đ
     else if code in [240, 271, 273]
       char = 'd'
-    # 232~235: èéêë, 275: ē, 277: ĕ, 279: ė, 281: ę, 283: ě 
+    # 232~235: èéêë, 275: ē, 277: ĕ, 279: ė, 281: ę, 283: ě
     else if 232 <= code <= 235 or code in [275, 277, 279, 281, 283]
       char = 'e'
     # 285: ĝ, 287: ğ, 289: ġ, 291: ģ
@@ -152,7 +152,7 @@ emitter.removeAccents = (str) ->
     # 311: ķ, 312: ĸ
     else if code in [311, 312]
       char = 'k'
-    # 314: ĺ, 316: ļ, 318: ľ, 320: ŀ, 322: ł 
+    # 314: ĺ, 316: ļ, 318: ľ, 320: ŀ, 322: ł
     else if code in [314, 316, 318, 320, 322]
       char = 'l'
     # 241: ñ, 324: ń, 326: ņ, 328: ň, 329: ŉ, 331: ŋ
@@ -161,7 +161,7 @@ emitter.removeAccents = (str) ->
     # 242~246: òóôõö, 333: ō, 335: ŏ, 337: ő, 339: œ
     else if 242 <= code <= 246 or code in [333, 335, 337, 339]
       char = 'o'
-    # 341: ŕ, 343: ŗ, 345: ř 
+    # 341: ŕ, 343: ŗ, 345: ř
     else if code in [331, 343, 345]
       char = 'r'
     # 347: ś, 349: ŝ, 351: ş, 353: š
@@ -181,7 +181,7 @@ emitter.removeAccents = (str) ->
       char = 'z'
     char
   ).join ''
-  
+
 # Replace unallowed character from incoming http response, to avoid breaking the further storage.
 # The replacement character is a space.
 #
@@ -198,7 +198,7 @@ emitter.check = (body, competition) ->
   body = body.toString()
   for i in [0...body.length]
     code = body.charCodeAt i
-    continue if code in [9, 10, 13] or 192 <= code <= 255 or 32 <= code <= 126 
+    continue if code in [9, 10, 13] or 192 <= code <= 255 or 32 <= code <= 126
     console.log "> competition #{competition.id} #{competition.place}:", code, body[i]
 
 module.exports = emitter

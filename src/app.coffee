@@ -3,6 +3,9 @@
 gui = require 'nw.gui'
 fs = require 'fs-extra'
 moment = require 'moment'
+{version} = require './package.json'
+
+console.log "running Palmares #{version} on node-webkit v#{process.versions['node-webkit']}"
 
 # register window globals inside NodeJS's global space
 global.gui = gui
@@ -14,7 +17,7 @@ Storage = require './lib/service/indexeddb.js'
 _ = require 'underscore'
 isMaximized = false
 
-splash = gui.Window.open 'template/splash.html', 
+splash = gui.Window.open 'template/splash.html',
   position: 'center'
   toolbar: false
   resizable: false
@@ -59,7 +62,7 @@ win.once 'loaded', ->
   # opens dev tools on F12 or Command+Option+J
   $(window).on 'keyup', (event) ->
     win.showDevTools() if event.which is 123 or event.witch is 74 and event.metaKey and event.altKey
-      
+
   # restore from local storage application state if possible
   if localStorage.getItem 'x'
     x = Number localStorage.getItem 'x'
@@ -72,7 +75,7 @@ win.once 'loaded', ->
   else
     infos = require './package.json'
     win.resizeTo infos.window.min_width, infos.window.min_height,
-  
+
   # init storage service
   global.storage = new Storage()
   Cleaner.sanitize global.storage, ->

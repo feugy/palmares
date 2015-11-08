@@ -42,7 +42,7 @@ module.exports = class Provider extends EventEmitter
   listResults: (callback = ->) =>
     callback new Error "#{@opts.name} does not implement the 'listResults' feature"
 
-  # Load details for a given competition. 
+  # Load details for a given competition.
   # It list the competition's contests, and for each contests, couple ranking.
   # The competition's contests array will be filled once finished.
   #
@@ -58,7 +58,7 @@ module.exports = class Provider extends EventEmitter
   # @param searched [String] searched string
   # @param callback [Function] end callback, invoked with arguments:
   # @option callback err [Error] an error object or null if no error occured
-  # @options callback couples [array] list of strings containing the club names (may be empty). 
+  # @options callback couples [array] list of strings containing the club names (may be empty).
   searchGroups: (searched, callback) =>
     callback new ERror "#{@opts.name} does not implement the 'searchClubs' feature"
 
@@ -68,7 +68,7 @@ module.exports = class Provider extends EventEmitter
   # @param searched [String] searched string
   # @param callback [Function] end callback, invoked with arguments:
   # @option callback err [Error] an error object or null if no error occured
-  # @options callback couples [array] list of strings containing the couple names (may be empty). 
+  # @options callback couples [array] list of strings containing the couple names (may be empty).
   searchCouples: (searched, callback) =>
     callback new ERror "#{@opts.name} does not implement the 'searchCouples' feature"
 
@@ -78,6 +78,6 @@ module.exports = class Provider extends EventEmitter
   # @param group [String] the concerned club or country.
   # @param callback [Function] end callback, invoked with arguments:
   # @option callback err [Error] an error object or null if no error occured
-  # @option callback couples [Array] list of strings containing the couple names (may be empty). 
+  # @option callback couples [Array] list of strings containing the couple names (may be empty).
   getGroupCouples: (group, callback) =>
     callback new Error "#{@opts.name} does not implement the 'getGroupCouples' feature"

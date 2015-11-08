@@ -1,11 +1,11 @@
 'use strict'
-  
+
 _ = require 'underscore'
 async = require 'async'
 request = require 'request'
 moment = require 'moment'
 cheerio = require 'cheerio'
-md5 = require('md5').digest_s
+md5 = require 'md5'
 Provider = require './provider'
 Competition = require '../model/competition'
 util = require '../util/common'
@@ -18,7 +18,7 @@ cleanNames = (names) ->
   return "couple inconnu" if /couple inconnu/.test names.toLowerCase()
   # split both dancers
   dancers = names.split '<br>'
-  results = [] 
+  results = []
   for dancer in dancers
     # remove remaining html
     dancer = _.stripTags dancer
@@ -29,7 +29,7 @@ cleanNames = (names) ->
     for char, i in dancer
       code = dancer.charCodeAt i
       # Uppercase symbol
-      # A: 65 Z: 90 À: 192 Ý: 221 
+      # A: 65 Z: 90 À: 192 Ý: 221
       if 65 <= code <= 90 or 192 <= code <= 221
         last += char
         prevUpper = true
@@ -52,7 +52,7 @@ cleanNames = (names) ->
     # capitalize and remove accentuated letters
     results.push "#{util.removeAccents first} #{util.removeAccents last}"
   "#{_.titleize results[0]} - #{_.titleize results[1]}"
-  
+
 # Remove useless information from contest titles
 #
 # @param original [String] original contest title
@@ -221,14 +221,14 @@ module.exports = class FFDSProvider extends Provider
   # @param body [String] the Html response
   # @param callback [Function] end callback, invoked with arguments:
   # @option callback err [Error] an error object or null if no error occured
-  # @options callback couples [array] list of strings containing the couple names (may be empty). 
+  # @options callback couples [array] list of strings containing the couple names (may be empty).
   _extractNames: (body, callback) =>
     couples = []
     $ = cheerio.load util.replaceUnallowed(body.toString()), decodeEntities: false
     for couple in $ '#tosort tbody tr'
       couple = $(couple)
       # ignore inactive couples
-      #if couple.find('td:last-child').text() is 'Oui' 
+      #if couple.find('td:last-child').text() is 'Oui'
       try
         couples.push cleanNames couple.find('td:first-child').text().trim().replace ' / ', '<br>'
       catch exc
@@ -262,7 +262,7 @@ module.exports = class FFDSProvider extends Provider
     existing = _.findWhere competitions, id: data.id
     unless existing?
       # do not add twice the same competition
-      competitions.push new Competition data 
+      competitions.push new Competition data
     else unless data.url in existing.dataUrls
       # Merge urls if needed
       existing.dataUrls.push data.url
@@ -288,16 +288,16 @@ module.exports = class FFDSProvider extends Provider
       return callback new Error "error on contest #{url}: #{err}" if err?
 
       body = util.replaceUnallowed body.toString()
-      # remove errored divs 
+      # remove errored divs
       body = body.replace /<\/div><\/th>/g, '</th>'
       # extract ranking
-      $ = cheerio.load body, decodeEntities: false 
+      $ = cheerio.load body, decodeEntities: false
       results = {}
       title = cleanContest $('h3').text()
       # for each heat (first is final)
       for heat in $ '.portlet'
         for row in $(heat).find 'tbody > tr'
-          try 
+          try
             names = cleanNames $(row).find('td:nth-child(3)').html()
           catch exc
             return callback new Error "failed to parse '#{competition.place}' '#{title}' heat #{i*2} names '#{names}': #{exc}"
