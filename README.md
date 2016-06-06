@@ -35,15 +35,23 @@ So, all sources are under `src` folder, and are compiled into `lib` folder, afte
 
 If you change stuff under src, don't forget to compile before launching the application with the shell command `gulp build`
 
-To build the windows installer, download [NSIS](http://nsis.sourceforge.net/Main_Page) and [Access control plugin](http://nsis.sourceforge.net/AccessControl_plug-in), and compile the `installer/installer.nsi` with it (don't forget to run `npm prune --production` before to lighten installation package)
+To build the windows installer, download [NSIS](http://nsis.sourceforge.net/Main_Page), [Access control plugin](http://nsis.sourceforge.net/AccessControl_plug-in) and
+[JSON plugin](http://nsis.sourceforge.net/NsJSON_plug-in) (unzip plugins directly in NSIS root folder), and compile the `installer/installer.nsi` with it (don't forget to run `npm prune --production` before to lighten installation package)
 
 # TODO / TOFIX
 
 - Competition list pagination for better performance
 - Competition export in XLSX is broken
-- nw.io with from 0.12.0 crash because too many data handled (no uncaught exception)
 
 # Release notes
+
+v1.9.0
+
+  - use latest nw.js version 0.15.1
+  - output logs in log.txt instead of console
+  - avoid duplicate contests in competitions
+  - use default configuration when conf not available
+  - fix cleaner when no DB exists
 
 v1.8.0
 

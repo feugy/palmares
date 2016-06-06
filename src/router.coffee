@@ -30,9 +30,9 @@ module.exports = class Router extends EventEmitter
 
   # Router constructor: initialize services and run home view.
   constructor: ->
-    #set main window title
-    gui.Window.get().title = @i18n.titles.application
+    # set main window title
     $('header h1').html @i18n.titles.application
+    global.win.title = @i18n.titles.application
     # build providers
     @providers = [
       new FFDS util.confKey 'providers.FFDS'
@@ -41,7 +41,7 @@ module.exports = class Router extends EventEmitter
     @service = new PalmaresService storage, @providers, _.extend {appTitle: @i18n.titles.application}, @i18n.export
     global.service = @service
     global.searchProvider = @providers[0]
-    
+
     @service.on 'ready', =>
       # add configuration and credits view
       $('.parameters').addClass('btn-group').html("""
@@ -74,12 +74,12 @@ module.exports = class Router extends EventEmitter
         @constructor = false
         $('#main').removeClass('leaving').empty().scrollTop(0).append view.$el
       , if @constructor then 0 else 500
-    else 
+    else
       throw new Error "unknown route #{path}"
     @emit 'navigate', path: path
 
   # **private**
-  # Display a popup for settings. 
+  # Display a popup for settings.
   # Proxy is the only supported settings for now
   #
   # @param event [Event] optionnal cancelled click event
@@ -93,7 +93,7 @@ module.exports = class Router extends EventEmitter
     ]
 
   # **private**
-  # Display a popup for credits. 
+  # Display a popup for credits.
   #
   # @param event [Event] optionnal cancelled click event
   _onAbout: (event) =>

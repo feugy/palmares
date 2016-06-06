@@ -7,6 +7,7 @@ fs = require 'fs-extra'
 xlsx = require 'xlsx.js'
 View = require '../view/view'
 util = require '../util/ui'
+console = require '../util/logger'
 TrackingView = require './tracking'
 ProgressView = require './progress'
 
@@ -46,7 +47,7 @@ module.exports = class HomeView extends View
   filter: null
 
   # event map
-  events: 
+  events:
     'click .track': '_onTrackPopup'
     'click .couple': '_onOpenCouple'
     'click .result': '_onOpenCouple'
@@ -128,7 +129,7 @@ module.exports = class HomeView extends View
         """
         <li class="competition" data-id="#{competition.id}">
           <span class="date">#{competition.date.format @i18n.dateFormat}</span>
-          <span class="name">#{competition.place}</span> 
+          <span class="name">#{competition.place}</span>
           <span class="pull-right">
             <a class="export-competition btn" href="#"><i class="icon-download"></i></a>
             <a class="remove btn btn-warning" href="#"><i class="icon-trash"></i></a>
@@ -192,7 +193,7 @@ module.exports = class HomeView extends View
   # @param event [Event] cancelled click event
   _onTrackPopup: (event) =>
     event?.preventDefault()
-    
+
     tracking = new TrackingView()
 
     # opens a popup that will track selected couples
@@ -212,7 +213,7 @@ module.exports = class HomeView extends View
           service.track tracking.couples,  (err, summary) =>
             if err?
               popup.modal 'hide'
-              return util.popup @i18n.titles.trackError, _.sprintf @i18n.errors.track, err.message 
+              return util.popup @i18n.titles.trackError, _.sprintf @i18n.errors.track, err.message
             # render list with newly added couples
             @renderTracked()
             # close popup with a slight delay to show progress
@@ -242,7 +243,7 @@ module.exports = class HomeView extends View
     service.update (err, results) =>
       if err?
         popup.modal 'hide'
-        return util.popup @i18n.titles.refreshError, _.sprintf @i18n.errors.refresh, err.message 
+        return util.popup @i18n.titles.refreshError, _.sprintf @i18n.errors.refresh, err.message
       console.log 'new results found:', results
       @renderCompetitions()
       # close popup with a slight delay to show progress

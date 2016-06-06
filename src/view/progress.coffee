@@ -2,6 +2,7 @@
 
 _ = require 'underscore'
 moment = require 'moment'
+console = require '../util/logger'
 View = require '../view/view'
 {safeLoad} = require 'js-yaml'
 {readFileSync} = require 'fs-extra'
@@ -71,7 +72,7 @@ module.exports = class ProgressView extends View
         @currentComp = 0
       when 'compRetrieved'
         console.log "retrieved #{details.num} competitions"
-        # arbitrary add 5% 
+        # arbitrary add 5%
         width = 0.5
         unless @totalComps?
           @totalComps = details.num

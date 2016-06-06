@@ -51,7 +51,7 @@ module.exports = class IndexedDB extends Storage
       callback request.error
 
     request.onupgradeneeded = =>
-      @db = request.result  
+      @db = request.result
       objectStore = @db.createObjectStore storeName
 
   # @see Storage.has
@@ -78,7 +78,7 @@ module.exports = class IndexedDB extends Storage
       return callback new Error "no value provided" unless obj?
       # opens a read-write transaction
       tx = @db.transaction [storeName], 'readwrite'
-      
+
       # set the value for a given key
       request = tx.objectStore(storeName).put JSON.parse(JSON.stringify obj), key
 
@@ -94,7 +94,7 @@ module.exports = class IndexedDB extends Storage
       return callback new Error "no key provided" unless _.isString key
       # opens a read-only transaction
       tx = @db.transaction [storeName]
-      
+
       # get the value of a given key
       request = tx.objectStore(storeName).get key
 
@@ -110,7 +110,7 @@ module.exports = class IndexedDB extends Storage
       return callback new Error "no key provided" unless _.isString key
       # opens a read-only transaction
       tx = @db.transaction [storeName], 'readwrite'
-      
+
       # get the value of a given key
       request = tx.objectStore(storeName).delete key
 

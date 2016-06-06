@@ -3,6 +3,7 @@
 _ = require 'underscore'
 async = require 'async'
 {EventEmitter} = require 'events'
+console = require '../util/logger'
 Ranking = require '../model/ranking'
 Cleaner = require '../service/cleaner'
 
@@ -16,7 +17,7 @@ inProgress = false
 # The storage service is decoupled and provided within constructor.
 # It triggers events `progress` while tracking couples with following arguments:
 # @param state [String] `start`, `compRetrieved`, `compStart`, `compEnd`, `end`, depending on the state.
-# @param details [Object] for `compRetrieved` the number of competitions, for `compStart` and `compEnd` the concerned competition. 
+# @param details [Object] for `compRetrieved` the number of competitions, for `compStart` and `compEnd` the concerned competition.
 #
 # The event `result` is also triggered when a new results are found, with arguments:
 # @param ranking [Object] a Ranking model object
@@ -56,7 +57,7 @@ module.exports = class PalmaresService extends EventEmitter
   # Triggers a `ready` event when fully initialized
   #
   # @param storage [Object] a Storage service instance.
-  # @param providers [Array] array of providers used to get competitions. 
+  # @param providers [Array] array of providers used to get competitions.
   # @param i18n [Object] labels used inside the export.
   constructor: (@storage, @providers, @i18n) ->
     # restore state from storage
@@ -67,7 +68,7 @@ module.exports = class PalmaresService extends EventEmitter
         console.error "failed to restore competitions: #{err}" if err?
         @competitions = value or {}
         @emit 'ready'
-    # relay providers events 
+    # relay providers events
     for provider in @providers
       provider.on 'progress', (args...) => @emit.apply @, ['progress'].concat args
 
@@ -85,7 +86,7 @@ module.exports = class PalmaresService extends EventEmitter
     # enrich stored palmares with competitions data
     palmares = []
     for id, results of details.palmares when id of @competitions
-      palmares.push 
+      palmares.push
         competition: @competitions[id]
         results: results
     callback null, palmares.sort (r1, r2) -> r2.competition.date.unix() - r1.competition.date.unix()
@@ -107,7 +108,7 @@ module.exports = class PalmaresService extends EventEmitter
     return callback null, [] if couples.length is 0
 
     for couple, i in couples
-      couples[i] = 
+      couples[i] =
         name: couple
         palmares: {}
       @tracked.push couples[i]
@@ -132,7 +133,7 @@ module.exports = class PalmaresService extends EventEmitter
       @emit 'progress', 'compRetrieved', num: available, name:(provider.opts.name for provider in @providers).join ' / '
       for id, competition of @competitions
         @emit 'progress', 'compStart', competition
-        @_analyze couples, competition, results 
+        @_analyze couples, competition, results
         @emit 'progress', 'compEnd', competition
       return _.defer end
 
@@ -203,7 +204,7 @@ module.exports = class PalmaresService extends EventEmitter
               @emit 'progress', 'compFailed', competition, err
             else
               # keep competition
-              @_analyze @tracked, competition, results 
+              @_analyze @tracked, competition, results
             @emit 'progress', 'compEnd', competition
             next2()
         , next
@@ -212,7 +213,7 @@ module.exports = class PalmaresService extends EventEmitter
       inProgress = false
       # something bad happens
       if err?
-        console.error "failed to refresh competitions: #{err}" 
+        console.error "failed to refresh competitions: #{err}"
         return callback err, []
       # nothing new.
       return callback null, [] if newCompetitions.length is 0
@@ -311,13 +312,13 @@ module.exports = class PalmaresService extends EventEmitter
     # sort competitions by date
     competitions = competitions.sort((c1, c2) -> c2.date.unix() - c1.date.unix())
 
-    xlsx = 
+    xlsx =
       creator: @i18n.appTitle
       lastModifiedBy: @i18n.appTitle
       worksheets: []
 
     # creates the global sheet
-    sheet = 
+    sheet =
       name: @i18n.globalSheet
       data: []
     xlsx.worksheets.push sheet
@@ -359,7 +360,7 @@ module.exports = class PalmaresService extends EventEmitter
 
   # **private**
   # Analyze a given competition to enrich the specified couples' palmared
-  # 
+  #
   # @param couples [Array] array of couples, contains for each of them an object with:
   # @option couples name [String] the couple name
   # @option couples palmares [Object] associative array of competitions (competition id as key) that store the competition ranking array
@@ -378,7 +379,7 @@ module.exports = class PalmaresService extends EventEmitter
       for couple in couples when couple.name of contest.results
         # to find rank, walk down from the final
         couple.palmares[competition.id] = [] unless competition.id of couple.palmares
-        ranking = new Ranking 
+        ranking = new Ranking
           couple: couple.name
           kind: kind
           contest: contest.title
@@ -387,5 +388,5 @@ module.exports = class PalmaresService extends EventEmitter
         couple.palmares[competition.id].push ranking
         @emit 'result', ranking, competition
         # keep track of new rankings
-        rankings.push ranking 
+        rankings.push ranking
     results.push competition: competition, results: rankings unless rankings.length is 0

@@ -67,6 +67,8 @@ module.exports = class WDSFProvider extends Provider
       # no contests yet
       return callback null unless urls.length
       competition.contests = []
+      urls = _.uniq urls
+
       @emit 'progress', 'contestsRetrieved', competition: competition, total: urls.length
       # get all contests rankings
       async.eachSeries urls, (url, next) =>
@@ -131,7 +133,10 @@ module.exports = class WDSFProvider extends Provider
 
       # Unless contest was cancelled...
       body = body.toString()
-      if @_hasResults body
+
+      if body.indexOf('Not ranked yet') >= 0
+        err = new Error "results not ready for '#{@opts.name} #{competition.place}' #{url}"
+      else unless body.indexOf('Cancelled') >= 0
         # extract ranking
         $ = cheerio.load util.replaceUnallowed(body), decodeEntities: false
         results =
@@ -152,16 +157,6 @@ module.exports = class WDSFProvider extends Provider
               rank = $(row).find('td:nth-child(1)').text()
               results.results[_.titleize util.removeAccents name] = parseInt rank
           competition.contests.push results
-      else
-        err = new Error "results not ready for '#{@opts.name} #{competition.place}'"
 
       @emit 'progress', 'contestEnd', competition: competition, done: competition.contests.length
       callback err or null
-
-  # **private**
-  # Tells if a competition contest contains rankings or not.
-  #
-  # @param body [String] html response text
-  # @return [Boolean] true if rankings are availables
-  _hasResults: (body) =>
-    -1 is body.indexOf('Cancelled') and -1 is body.indexOf 'Not ranked yet'

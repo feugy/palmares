@@ -24,7 +24,7 @@ module.exports = class CompetitionView extends View
   contests: []
 
   # event map
-  events: 
+  events:
     'click .home': '_onHome'
     'click li': '_onOpenCouple'
     'click a.external': '_onOpenSource'
@@ -38,7 +38,7 @@ module.exports = class CompetitionView extends View
     super className: 'details'
     @competition = service.competitions[id]
     return router.navigate 'home' unless @competition?
-    @date = @competition.date.format @i18n.dateFormat 
+    @date = @competition.date.format @i18n.dateFormat
     # if no contests found, allow empty displayal
     if @competition?.contests?
       @contests = (
@@ -62,7 +62,7 @@ module.exports = class CompetitionView extends View
   #
   # @param event [Event] cancelled click event
   _onOpenSource: (event) =>
-    gui.Shell.openExternal @competition.url
+    nw.Shell.openExternal @competition.url
     event?.preventDefault()
 
   # **private**

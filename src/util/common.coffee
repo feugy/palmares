@@ -7,6 +7,7 @@ moment = require 'moment'
 _ = require 'underscore'
 EventEmitter = require('events').EventEmitter
 _.mixin require('underscore.string').exports()
+console = require './logger'
 
 env = process.env.NODE_ENV?.trim()?.toLowerCase() or 'dev'
 
@@ -14,26 +15,41 @@ env = process.env.NODE_ENV?.trim()?.toLowerCase() or 'dev'
 emitter = new EventEmitter()
 emitter.setMaxListeners 0
 
+watcher = null
+
 # read configuration file from application folder
 conf = null
 
+defaultPath = resolve __dirname, '..', '..', 'conf', 'dev-conf.yml'
+
 if env is 'test'
-  confPath = resolve __dirname, join '..', '..', 'conf', "#{env}-conf.yml"
+  confPath = resolve __dirname, '..', '..', 'conf', "#{env}-conf.yml"
 else
-  confPath = join gui.App.dataPath, 'conf', "#{env}-conf.yml"
+  confPath = resolve nw.App.dataPath, 'conf', "#{env}-conf.yml"
 
 parseConf = ->
-  try
-    conf = safeLoad fs.readFileSync confPath, 'utf-8'
-  catch err
-    throw new Error "Cannot read or parse configuration file '#{confPath}': #{err}"
-parseConf()
+  readConf = (path, watch = true) ->
+    console.log "parse configuration at #{path}"
+    conf = safeLoad fs.readFileSync path, 'utf8'
+    return if !watch or watcher?
+    watcher = fs.watch confPath, ->
+      parseConf()
+      console.log 'configuration changed !'
+      emitter.emit 'confChanged'
 
-# read again if file is changed
-fs.watch confPath, ->
-  parseConf()
-  console.log 'configuration changed !'
-  emitter.emit 'confChanged'
+  try
+    readConf confPath
+  catch err
+    console.log err, err.message, err.code
+    throw new Error "Cannot read or parse configuration file '#{confPath}': #{err}" unless err?.code is 'ENOENT'
+    # create defaults configuration file
+    console.log "use default configuration at #{defaultPath}"
+    fs.ensureFileSync confPath
+    readConf defaultPath, false
+    fs.writeFileSync confPath, safeDump(conf), 'utf8'
+    readConf confPath
+
+parseConf()
 
 # This method is intended to replace the broken typeof() Javascript operator.
 #
@@ -113,7 +129,7 @@ emitter.saveKey = (key, value) ->
 
   # synchronously save configuration
   try
-    fs.writeFileSync confPath, safeDump(conf), 'utf-8'
+    fs.writeFileSync confPath, safeDump(conf), 'utf8'
   catch err
     throw new Error "Cannot write configuration file '#{confPath}': #{err}"
 

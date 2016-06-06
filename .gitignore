@@ -1,8 +1,10 @@
-bin
+bin*
 lib
 installer/*.exe
 node_modules
 error.txt
+log.txt
 .sublime-gulp*
 sublime-gulp*
 cache
+npm-debug.log

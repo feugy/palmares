@@ -1,35 +1,36 @@
 'use strict'
 
-gui = require 'nw.gui'
 fs = require 'fs-extra'
 moment = require 'moment'
+console = require './lib/util/logger.js'
 {version} = require './package.json'
 
 console.log "running Palmares #{version} on node-webkit v#{process.versions['node-webkit']}"
 
+# 'win' is Node-Webkit's window
+# 'window' is DOM's window
+win = nw.Window.get()
+
 # register window globals inside NodeJS's global space
-global.gui = gui
 global.$ = $
+global.win = win
 # first require: use path relative to index.html
 Router = require './lib/router.js'
 Cleaner = require './lib/service/cleaner.js'
 Storage = require './lib/service/indexeddb.js'
 _ = require 'underscore'
 isMaximized = false
+splash = null
 
-splash = gui.Window.open 'template/splash.html',
+nw.Window.open 'template/splash.html',
   position: 'center'
-  toolbar: false
   resizable: false
   frame: false
   show: true
-  'always-on-top': true
+  always_on_top: true
   height: 200
   width: 400
-
-# 'win' is Node-Webkit's window
-# 'window' is DOM's window
-win = gui.Window.get()
+, (win) -> splash = win
 
 # stores in local storage application state
 win.on 'close', ->
@@ -38,13 +39,14 @@ win.on 'close', ->
     localStorage.setItem attr, win[attr]
 
   localStorage.setItem 'maximized', isMaximized
-  @close true
+  win.close true
 
 win.on 'maximize', -> isMaximized = true
 win.on 'unmaximize', -> isMaximized = false
 win.on 'minimize', -> isMaximized = false
+win.on 'resize', -> isMaximized = false
 
-# Display on dev tools the caught error and do not crash
+# display on dev tools the caught error and do not crash
 process.on 'uncaughtException', errorHandler = (err, file, line) ->
   if file?
     err = "#{err} (#{file}:#{line})"
@@ -56,12 +58,7 @@ process.on 'uncaughtException', errorHandler = (err, file, line) ->
 
 # DOM is ready
 win.once 'loaded', ->
-  global.console = window.console
   window.onerror = errorHandler
-
-  # opens dev tools on F12 or Command+Option+J
-  $(window).on 'keyup', (event) ->
-    win.showDevTools() if event.which is 123 or event.witch is 74 and event.metaKey and event.altKey
 
   # restore from local storage application state if possible
   if localStorage.getItem 'x'
@@ -79,7 +76,6 @@ win.once 'loaded', ->
   # init storage service
   global.storage = new Storage()
   Cleaner.sanitize global.storage, ->
-
     # we are ready: shows it !
     win.show()
     # local storage stores strings !
@@ -89,6 +85,6 @@ win.once 'loaded', ->
     _.delay ->
       global.router = new Router()
       _.delay ->
-        splash.close true
+        splash.close true if splash?
       , 50
     , 100

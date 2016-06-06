@@ -143,6 +143,8 @@ module.exports = class FFDSProvider extends Provider
       # no contests yet
       return callback null unless urls.length
       competition.contests = []
+      urls = _.uniq urls
+
       @emit 'progress', 'contestsRetrieved', competition: competition, total: urls.length
       # get all contests rankings
       async.eachSeries urls, (url, next) =>

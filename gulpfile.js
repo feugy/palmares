@@ -32,7 +32,7 @@ var paths = {
 var platforms = ['osx64'];
 
 gulp.task('clean', function(done) {
-  async.parallel([paths.dest, 'build', 'cache']n fs.remove, done);
+  async.each([paths.dest, 'build', 'cache'], fs.remove, done);
 });
 
 // cleans destination folder and copy vendor libs into it

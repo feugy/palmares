@@ -1,7 +1,7 @@
 {
   "name": "palmares",
-  "version": "1.8.0",
-  "releaseDate": "28/01/2015",
+  "version": "1.9.0",
+  "releaseDate": "06/06/2016",
   "author": "Feugy <damien.feugas@gmail.com>",
   "description": "Palmares [pal.ma.ʁɛs] is a desktop application to get french and internationnal ballroom dancing results",
   "repository": {
@@ -49,8 +49,7 @@
   },
   "window": {
     "icon": "style/ribas-icon.png",
-    "toolbar": false,
-    "show": false,
+    "show": true,
     "min_width": 900,
     "min_height": 600
   }

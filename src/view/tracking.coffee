@@ -4,6 +4,7 @@ _ = require 'underscore'
 {safeLoad} = require 'js-yaml'
 {readFileSync} = require 'fs-extra'
 View = require '../view/view'
+console = require '../util/logger'
 
 # validation regexp
 coupleRegex = /^(?:[\w-]+ ){2,}-(?: [\w-]+){2,}$/gi
@@ -30,12 +31,12 @@ module.exports = class HomeView extends View
     group: null
 
   # textual message to indicate status
-  alert: 
+  alert:
     couple: null
     group: null
 
   # event map
-  events: 
+  events:
     'keyup input': '_onCheckName'
 
   # Tracking View constructor
@@ -45,7 +46,7 @@ module.exports = class HomeView extends View
   constructor: ->
     super className: 'track'
     @couples = []
-    @checking = 
+    @checking =
       couple: false
       group: false
     @status = {}
@@ -86,7 +87,7 @@ module.exports = class HomeView extends View
 
   # **private**
   # Check group's existence with provider to provider autocompletion.
-  # 
+  #
   # @param input [String] text of autocompleted input field
   # @param callback [Function] completition end function. Invoked with an array (may be empty) of completion strings
   _onCheckGroup: (input, callback) =>
@@ -120,7 +121,7 @@ module.exports = class HomeView extends View
 
   # **private**
   # Check couple's existence with provider to provider autocompletion.
-  # 
+  #
   # @param input [String] text of autocompleted input field
   # @param callback [Function] completition end function. Invoked with an array (may be empty) of completion strings
   _onCheckCouple: (input, callback) =>
@@ -161,7 +162,7 @@ module.exports = class HomeView extends View
     @alert.couple.hide()
     @status.couple.removeClass().addClass 'icon-question-sign'
     # check couple name and group status
-    if coupleRegex.test couple 
+    if coupleRegex.test couple
       @status.couple.removeClass().addClass 'icon-ok'
       @alert.couple.html(@i18n.msgs.validCouple)
         .removeClass('alert-info')

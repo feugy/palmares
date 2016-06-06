@@ -1,6 +1,7 @@
 'use strict'
 
 fs = require 'fs-extra'
+console = require '../util/logger'
 
 # Data sanitizer
 module.exports = class Cleaner
@@ -15,7 +16,7 @@ module.exports = class Cleaner
 
     # get competitions from storage
     storage.pop 'competitions', (err, competitions) =>
-      throw new Error err if err?
+      console.error err if err?
       return callback() unless competitions?
 
       length = Object.keys(competitions).length
@@ -23,7 +24,7 @@ module.exports = class Cleaner
       cleaned = {}
       idChanged = false
 
-      for id, competition of competitions 
+      for id, competition of competitions
         # removes competition that are empty
         if competition?.contests?.length > 0
           cleaned[id] = competition
@@ -38,13 +39,15 @@ module.exports = class Cleaner
 
         # or store the cleaned result before going
         storage.push 'competitions', cleaned, (err) =>
-          throw new Error err if err?
+          console.error err if err?
           console.info 'saved cleaned competitions'
           callback()
 
       # get competitions from storage
       storage.pop 'tracked', (err, tracked) =>
-        throw new Error err if err?
+        console.error err if err?
+        return end() unless tracked?
+
         coupleChanged = false
 
         for couple in tracked
@@ -55,5 +58,5 @@ module.exports = class Cleaner
 
         return end() unless coupleChanged
         storage.push 'tracked', tracked, (err) =>
-          throw new Error err if err?
+          console.error err if err?
           end()
