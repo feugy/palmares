@@ -47,6 +47,7 @@ section
   file /r ..\conf
   ; grant permission for writing
   AccessControl::GrantOnFile "$LOCALAPPDATA\palmares\conf" "(BU)" "GenericRead + GenericWrite"
+  AccessControl::GrantOnFile "$INSTDIR" "(BU)" "FullAccess"
 
   ; creates a shortcut within installation folder and on desktop
   createShortCut "$INSTDIR\Palmares.lnk" "$INSTDIR\bin\nw.exe" '"$INSTDIR"' "$INSTDIR\style\ribas-icon.ico"

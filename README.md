@@ -40,10 +40,15 @@ To build the windows installer, download [NSIS](http://nsis.sourceforge.net/Main
 
 # TODO / TOFIX
 
-- Competition list pagination for better performance
 - Competition export in XLSX is broken
 
 # Release notes
+
+v1.10.0
+
+  - use latest nw.js version 0.23.3
+  - detect excused & non-dancing couples in WDSF competitinos
+  - progressive scrolling in competition list
 
 v1.9.0
 

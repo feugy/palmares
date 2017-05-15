@@ -66,12 +66,20 @@ module.exports = class HomeView extends View
   # @return the built view
   constructor: () ->
     super className: 'home'
+    @competitions = []
+    @listState =
+      size: 50
+      offset: 0
+
     @bindTo service, 'result', @_onResult
     # read filter in local storage
     storage.pop 'home-filter', (err, filter) =>
       console.error err if err?
       @filter = filter or 'none'
       @render()
+
+      # scroll event don't bobble. We must register callback on the node itself
+      @bindTo @$('.competitions > ul.list'), 'scroll', _.debounce @_onCompetitionScroll, 100
 
   # Extends superclass behaviour to cache often used nodes
   render: =>
@@ -87,7 +95,7 @@ module.exports = class HomeView extends View
     tracked = service.tracked
     # hide removal button
     @$('.untrack').toggleClass 'hidden', true
-    list = @$('.tracked .list')
+    list = @$('.tracked > ul.list')
     # hide optionnal empty message, and displays it if necessary
     @$('.no-tracked').remove()
     return $("<div class='no-tracked'>#{@i18n.msgs.noTracked}</div>").insertAfter list.empty() unless tracked.length
@@ -113,19 +121,34 @@ module.exports = class HomeView extends View
 
   # refresh only the list of competitions
   renderCompetitions: =>
-    competitions = _.chain(service.competitions).values().sortBy('date').value().reverse()
+    @competitions = _.chain(service.competitions).values().sortBy('date').value().reverse()
+      .filter (competition) => isDisplayed competition, @filter
     # hide removal button
     @$('.remove').toggleClass 'hidden', true
-    list = @$('.competitions .list')
+    list = @$('.competitions > ul.list')
+    list.empty()
+    @listState.offset = 0
     # indicates whether a filter is active or not
     @$('.filter .btn').toggleClass 'enabled', @filter isnt 'none'
     @$('.filter .dropdown-menu li').removeClass 'enabled'
     @$(".filter .dropdown-menu li[data-filter = #{@filter}]").addClass 'enabled'
     # hide optionnal empty message, and displays it if necessary
     @$('.no-competitions').remove()
-    return $("<div class='no-competitions'>#{@i18n.msgs.noCompetitions}</div>").insertAfter list.empty() unless competitions.length
-    list.empty().append (
-      for competition in competitions when isDisplayed competition, @filter
+    # warning for too restrictive filter
+    return $("<div class='no-competitions'>#{@i18n.msgs.restrictiveFilter}</div>").insertAfter list.empty() unless @competitions.length
+    @_renderCompetitionPage list
+    @$('.remove').tooltip html: true, title: @i18n.tips.remove, delay: 750
+    @$('.export-competition').tooltip html: true, title: @i18n.tips.exportCompetition, delay: 750
+
+  # **private**
+  # Render a given page in competition list
+  # text the next `listState.size` competitions starting at `listState.offset`. The later is updated accordingly
+  #
+  # @param list [jQuery] List node in which competition are appended
+  _renderCompetitionPage: (list) =>
+    slice = @competitions[@listState.offset..@listState.offset + @listState.size]
+    list.append (
+      for competition in slice
         """
         <li class="competition" data-id="#{competition.id}">
           <span class="date">#{competition.date.format @i18n.dateFormat}</span>
@@ -137,10 +160,7 @@ module.exports = class HomeView extends View
         </li>
         """
     ).join ''
-    # warning for too restrictive filter
-    list.after "<div class='no-competitions'>#{@i18n.msgs.restrictiveFilter}</div>" if list.children().length is 0
-    @$('.remove').tooltip html: true, title: @i18n.tips.remove, delay: 750
-    @$('.export-competition').tooltip html: true, title: @i18n.tips.exportCompetition, delay: 750
+    @listState.offset += slice.length
 
   # **private**
   # Common behaviour of export function: handle error and opens a file selection popup to write xlsx content into
@@ -343,3 +363,13 @@ module.exports = class HomeView extends View
     storage.push 'home-filter', @filter, (err) =>
       console.error err if err?
       @renderCompetitions()
+
+  # **private**
+  # Handle scroll within competition list, to load remaining non-displayed competitions
+  #
+  # @param event [Event] scroll event
+  _onCompetitionScroll: (event) =>
+    return unless @listState.offset < @competitions.length
+    list = @$('.competitions > ul.list')
+    return unless list.scrollTop() + list.height() >= 0.80 * list.prop 'scrollHeight'
+    @_renderCompetitionPage list

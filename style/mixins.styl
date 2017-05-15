@@ -43,41 +43,6 @@ box-sizing(args...)
   -webkit-box-sizing args
   box-sizing args
 
-// Flexible box model compatibility
-display(value)
-  if value == box
-    display -webkit-box
-    display box
-  else if value == inline-box
-    display -webkit-inline-box
-    display inline-box
-  else
-    display value
-
-box-flex(args...)
-  -webkit-box-flex args
-  box-flex args
-
-box-ordinal-group(args...)
-  -webkit-box-ordinal-group args
-  box-ordinal-group args
-
-box-pack(args...)
-  -webkit-box-pack args
-  box-pack args
-
-box-direction(args...)
-  -webkit-box-direction args
-  box-direction args
-
-box-align(args...)
-  -webkit-box-align args
-  box-align args
-
-box-orient(args...)
-  -webkit-box-orient args
-  box-orient args
-
 // add a folded corner
 fold-corner(selector, cornerSize, bgColor, isRight = false)
 
@@ -99,7 +64,7 @@ fold-corner(selector, cornerSize, bgColor, isRight = false)
     border-right-color bgColor if isRight
     border-left-color bgColor unless isRight
     border-left-width -1+borderWidth if isRight
-    border-top-color bgColor 
+    border-top-color bgColor
     bottom 0
 
 // button overloading
@@ -115,7 +80,7 @@ button(selector, bgColor, iconWhite = false)
 
       .caret
         border-top-color white
-        
+
       i
         background-image url(glyphicons-halflings-white.png)
 

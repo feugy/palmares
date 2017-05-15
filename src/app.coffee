@@ -73,13 +73,24 @@ win.once 'loaded', ->
     infos = require './package.json'
     win.resizeTo infos.window.min_width, infos.window.min_height,
 
+  $(win.window).on 'keydown', (event) ->
+    # opens dev tools on F12 or Command+Option+J
+    win.showDevTools() if event.which is 123 or event.witch is 74 and event.metaKey and event.altKey
+    # reloads full app on F5
+    if event.which is 116
+      # must clear require cache also
+      delete global.require.cache[attr] for attr of global.require.cache
+      global.reload = true
+      win.removeAllListeners 'close'
+      win.reloadIgnoringCache()
+
   # init storage service
   global.storage = new Storage()
   Cleaner.sanitize global.storage, ->
     # we are ready: shows it !
     win.show()
     # local storage stores strings !
-    win.maximize() if 'true' is localStorage.getItem 'maximized'
+    win.maximize() if !!localStorage.getItem 'maximized'
 
     # start main application, after window is shown
     _.delay ->

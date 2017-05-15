@@ -154,8 +154,9 @@ module.exports = class WDSFProvider extends Provider
           for heat in $ '.list'
             for row in $(heat).find 'tbody > tr'
               name = $(row).find('td:nth-child(2)').text()
-              rank = $(row).find('td:nth-child(1)').text()
-              results.results[_.titleize util.removeAccents name] = parseInt rank
+              rank = parseInt $(row).find('td:nth-child(1)').text()
+              # no rank found ? excused or no-show couple
+              results.results[_.titleize util.removeAccents name] = rank unless isNaN rank
           competition.contests.push results
 
       @emit 'progress', 'contestEnd', competition: competition, done: competition.contests.length

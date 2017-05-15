@@ -23,10 +23,10 @@ $.cleanData = (elems) ->
   _cleanData elems
 
 module.exports = class View extends EventEmitter
-  
-  # view node: jQuery element of the highest DOM node within the view 
+
+  # view node: jQuery element of the highest DOM node within the view
   $el: null
-  
+
   # tag used when building the view node. default to 'div'
   tagName: 'div'
 
@@ -56,7 +56,7 @@ module.exports = class View extends EventEmitter
   # Array of bounds between targets and the view, that are unbound by `destroy`
   _bounds: []
 
-  # View constructor. 
+  # View constructor.
   # Create view element, and binds events if specified.
   constructor: (attrs) ->
     super()
@@ -100,8 +100,8 @@ module.exports = class View extends EventEmitter
   render: () =>
     # template rendering
     @$el.empty()
-    if @template? 
-      # first compilation if necessary  
+    if @template?
+      # first compilation if necessary
       @template = Hogan.compile @template if _.isString @template
       # then rendering
       @$el.append @template.render @getRenderData()
