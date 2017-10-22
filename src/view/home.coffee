@@ -1,5 +1,3 @@
-'use strict'
-
 _ = require 'underscore'
 fs = require 'fs-extra'
 {safeLoad} = require 'js-yaml'
@@ -10,6 +8,7 @@ util = require '../util/ui'
 console = require '../util/logger'
 TrackingView = require './tracking'
 ProgressView = require './progress'
+{dialog} = require('electron').remote
 
 # indicates wether a competition is displayable
 #
@@ -171,9 +170,10 @@ module.exports = class HomeView extends View
   _saveExportPopup: (err, result, name) =>
     return util.popup @i18n.titles.exportError, _.sprintf @i18n.errors.export, err.message if err?
     # display a file selection dialog
-    fileDialog = $("<input style='display:none' type='file' nwsaveas='#{name}.xlsx' accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'>").trigger 'click'
-    fileDialog.on 'change', =>
-      file = fileDialog[0].files?[0]?.path
+    dialog.showSaveDialog
+      defaultPath: "#{name}.xlsx"
+      filters: [name: 'Feuilles de calcul', extensions: ['xlsx', 'xls']]
+    , (file) =>
       return unless file?
       console.log "export palmares in file: #{file}"
       fs.writeFile normalize(file), new Buffer(xlsx(result).base64, 'base64'), (err) =>

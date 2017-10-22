@@ -1,5 +1,3 @@
-'use strict'
-
 _ = require 'underscore'
 
 # Storage is an interface to store and retrieve JSON structures

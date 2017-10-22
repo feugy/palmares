@@ -1,5 +1,3 @@
-'use strict'
-
 _ = require 'underscore'
 Hogan = require 'hogan.js'
 fs = require 'fs-extra'

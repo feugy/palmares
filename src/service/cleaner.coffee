@@ -1,5 +1,3 @@
-'use strict'
-
 fs = require 'fs-extra'
 console = require '../util/logger'
 

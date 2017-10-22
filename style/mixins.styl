@@ -63,7 +63,7 @@ fold-corner(selector, cornerSize, bgColor, isRight = false)
     border borderWidth solid transparent
     border-right-color bgColor if isRight
     border-left-color bgColor unless isRight
-    border-left-width -1+borderWidth if isRight
+    border-left-width -(borderWidth) if isRight
     border-top-color bgColor
     bottom 0
 

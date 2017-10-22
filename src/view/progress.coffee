@@ -1,5 +1,3 @@
-'use strict'
-
 _ = require 'underscore'
 moment = require 'moment'
 console = require '../util/logger'

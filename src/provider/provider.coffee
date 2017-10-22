@@ -1,5 +1,3 @@
-'use strict'
-
 # to use _.string also
 _ = require 'underscore'
 util = require '../util/common'

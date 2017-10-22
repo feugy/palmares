@@ -1,10 +1,9 @@
-'use strict'
-
 _ = require 'underscore'
 {safeLoad} = require 'js-yaml'
 {readFileSync} = require 'fs-extra'
 View = require '../view/view'
 util = require '../util/ui'
+{shell} = require('electron')
 
 module.exports = class CompetitionView extends View
 
@@ -62,7 +61,7 @@ module.exports = class CompetitionView extends View
   #
   # @param event [Event] cancelled click event
   _onOpenSource: (event) =>
-    nw.Shell.openExternal @competition.url
+    shell.openExternal @competition.url
     event?.preventDefault()
 
   # **private**

@@ -1,5 +1,3 @@
-'use strict'
-
 _ = require 'underscore'
 
 module.exports =
@@ -19,7 +17,7 @@ module.exports =
   popup: (title, message = '', buttons = [], closeIndex = 0) ->
     # parameter validations
     throw new Error "closeIndex #{closeIndex} is not a valid index in the buttons array" unless closeIndex >= 0 and (closeIndex < buttons.length or buttons.length is 0)
-    
+
     html = "<div class='modal hide fade'><div class='modal-header'>
       <button type='button' data-dismiss='modal' class='close'>&times;</button><h3>#{title}</h3></div>
       <div class='modal-body'></div><div class='modal-footer'>"
@@ -33,12 +31,12 @@ module.exports =
     popup = $(html)
     popup.find('.modal-body').append message
 
-    popup.modal(backdrop:'static').on('hide', (event) -> 
+    popup.modal(backdrop:'static').on('hide', (event) ->
       return if popup.preventClose
       # invoke close button if not prevented
       # close can be aborted if event is cancelled
       buttons[closeIndex]?.click event if _.isFunction buttons[closeIndex]?.click
-    ).on('hidden', -> 
+    ).on('hidden', ->
       popup.off().remove()
     ).on('click', 'a', (event) =>
       # invoke proper button behaviour

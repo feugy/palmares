@@ -1,5 +1,3 @@
-'use strict'
-
 _ = require 'underscore'
 {safeLoad} = require 'js-yaml'
 {readFileSync} = require 'fs-extra'
@@ -21,7 +19,7 @@ module.exports = class CoupleView extends View
   palmares: null
 
   # event map
-  events: 
+  events:
     'click .home': '_onHome'
     'click h3': '_onOpenCompetition'
 
@@ -51,7 +49,7 @@ module.exports = class CoupleView extends View
   # @param event [Event] cancelled click event
   _onHome: (event) =>
     event?.preventDefault()
-    router.navigate 'home'  
+    router.navigate 'home'
 
   # **private**
   # Navigate to the Competition details page.

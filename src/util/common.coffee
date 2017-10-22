@@ -1,9 +1,8 @@
-'use strict'
-
 {safeDump, safeLoad} = require 'js-yaml'
 fs = require 'fs-extra'
 moment = require 'moment'
 {resolve, join} = require 'path'
+{remote} = require 'electron'
 _ = require 'underscore'
 EventEmitter = require('events').EventEmitter
 _.mixin require('underscore.string').exports()
@@ -25,7 +24,7 @@ defaultPath = resolve __dirname, '..', '..', 'conf', 'dev-conf.yml'
 if env is 'test'
   confPath = resolve __dirname, '..', '..', 'conf', "#{env}-conf.yml"
 else
-  confPath = resolve nw.App.dataPath, 'conf', "#{env}-conf.yml"
+  confPath = resolve remote.app.getPath('userData'), "#{env}-conf.yml"
 
 parseConf = ->
   readConf = (path, watch = true) ->

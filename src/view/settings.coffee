@@ -1,5 +1,3 @@
-'use strict'
-
 View = require '../view/view'
 {safeLoad} = require 'js-yaml'
 {readFileSync} = require 'fs-extra'
@@ -8,7 +6,7 @@ View = require '../view/view'
 seasonRegexp = /^(\d+)\/(\d+)$/
 
 # Parse year from season, taking the first number
-# 
+#
 # @param season [String] the inputed season
 # @return false if season is invalid, the current year otherwise
 parseYear = (season) ->

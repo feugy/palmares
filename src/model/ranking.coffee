@@ -1,5 +1,3 @@
-'use strict'
-
 # Ranking wrap result of a given couple inside a competition
 module.exports = class Ranking
 

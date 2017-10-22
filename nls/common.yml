@@ -63,13 +63,13 @@ msgs:
     <p>Elles seront de nouveau analysées lors de la prochaine mise à jour.</p>
   trackingStart: <div>Récupération des compétitions</div>
   trackingEnd: <div>Etablissement des palmarès</div>
-  competitionRetrieved: > 
+  competitionRetrieved: >
     <div>%1$s: <em>%2$s</em> compétitions en cours d'analyse...</div>
   competitionInProgress: >
     <div class="%1$s">Analyse de <em>%2$s %3$s</em>: concours <span class="done">0</span>/<span class="total"></span>...</div>
   competitionAnalyzed: >
     <div>Compétition de <em>%1$s %2$s</em> analysée</div>
-    
+
   validCouple: le nom semble bon !
   foundInGroup: '%1$s couple(s) trouvé(s) !'
   searchInProgress: 'consultation en cours...'
@@ -133,10 +133,10 @@ about:
     <p>Développé pour le Club Villeurbannais de Danse Sportive, cette application permet en un seul coup d'oeil de consulter les résultat nationnaux et internationnaux de danse sportive, et de suivre vos couples préférés en établissant leur palmares.</p>
     <p>Les informations sont récupérés sur les pages web publiques des fournisseurs suivants :</p>
   contact: >
-    <p>Conception, réalisation et design par Damien Feugas <em>damien.feugas@gmail.com</em></p>
-    <p class="copyright">Copyright 2013-2014 © Damien Feugas</p>
+    <p>Conception, réalisation et design par Damien Simonin Feugas <em>damien.simoninfeugas@gmail.com</em></p>
+    <p class="copyright">Copyright 2013-2017 © Damien Simonin Feugas</p>
   providers:
-    - name: Fédération Française de Danse Sportive 
+    - name: Fédération Française de Danse Sportive
       credits: Copyright 2009 © FFD-CNSDS. Tous droits réservés <em>dansesportive.ffdanse.fr</em>
     - name: World DanseSport federation
       credits: © Copyright WDSF 2010-2012 All rights Reserved <em>www.worlddancesport.org</em>

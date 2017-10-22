@@ -1,5 +1,3 @@
-'use strict'
-
 _ = require 'underscore'
 async = require 'async'
 {EventEmitter} = require 'events'

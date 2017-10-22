@@ -1,5 +1,3 @@
-'use strict'
-
 _ = require 'underscore'
 {safeLoad} = require 'js-yaml'
 {readFileSync} = require 'fs-extra'

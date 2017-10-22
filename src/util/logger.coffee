@@ -18,6 +18,6 @@ trace = (level, args) ->
   fs.appendFile 'log.txt', "#{moment().format 'DD/MM/YYYY HH:mm:ss'} - #{level} - #{args.map(format).join ' '}\n"
 
 # Export a console like API to output message
-module.exports =
-  log: (args...) -> trace 'DEBUG', args
-  error: (args...) -> trace 'ERROR', args
+module.exports = console
+#  log: (args...) -> trace 'DEBUG', args
+#  error: (args...) -> trace 'ERROR', args

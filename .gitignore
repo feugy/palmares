@@ -7,5 +7,6 @@ log.txt
 .sublime-gulp*
 sublime-gulp*
 cache
+dist
 npm-debug.log
 installer/Version.txt

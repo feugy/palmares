@@ -1,5 +1,3 @@
-'use strict'
-
 moment = require 'moment'
 
 # Competition modelize an event that may last several days and contains many contests

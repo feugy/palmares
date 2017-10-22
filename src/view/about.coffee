@@ -1,5 +1,3 @@
-'use strict'
-
 {safeLoad} = require 'js-yaml'
 {readFileSync} = require 'fs-extra'
 View = require '../view/view'

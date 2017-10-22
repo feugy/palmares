@@ -1,5 +1,3 @@
-'use strict'
-
 _ = require 'underscore'
 Storage = require '../service/storage'
 Competition = require '../model/competition'
